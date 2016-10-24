@@ -135,10 +135,9 @@
     var rotation = lastAngle + (currentAngle - startAngle);
   //   lastAngle = rotation;
 
-    if (Math.abs(rotation - lastRotation) < threshold) {
-      return;
+    if (Math.abs(rotation - lastRotation) > threshold) {
+      tune(rotation);
     }
-    tune(rotation);
 
     if (event.type == "touchend") {
       lastAngle = rotation;
