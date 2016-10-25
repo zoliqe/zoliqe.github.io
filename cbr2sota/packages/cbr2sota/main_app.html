@@ -1,0 +1,24 @@
+<!--
+  Copyright (c) 2016, <your name>. All rights reserved. Use of this source code
+  is governed by a BSD-style license that can be found in the LICENSE file.
+-->
+
+<dom-module id="main-app">
+  <style>
+    :host {
+      display: block;
+    }
+  </style>
+
+  <template>
+    <paper-textarea label="Cabrillo" rows="10" placeholder="Paste contents of CBR file here" value="{{cabrillo}}" on-change="fillValues"></paper-textarea>
+    <paper-input label="Your Callsign" value="{{callsign}}"></paper-input>
+    <paper-input label="SOTA Reference" value="{{sotaRef}}"></paper-input>
+    <paper-button raised on-click="convert">Convert</paper-button>
+    <paper-textarea label="SOTA CSVv2" readonly rows="10" placeholder="Converted SOTA CSV will be shown here" value="[[csv]]"></paper-textarea>
+    <!-- <p>
+      Text: <span>{{text}}</span><br />
+      Reversed: <span>{{reverseText(text)}}</span>
+    </p> -->
+  </template>
+</dom-module>
