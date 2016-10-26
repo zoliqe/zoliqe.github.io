@@ -11,10 +11,15 @@
   </style>
 
   <template>
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/:view" data="{{routeData}}"></app-route>
+
     <paper-textarea label="Cabrillo" rows="10" placeholder="Paste contents of CBR file here" value="{{cabrillo}}" on-change="fillValues"></paper-textarea>
     <paper-input label="Your Callsign" value="{{callsign}}"></paper-input>
     <paper-input label="SOTA Reference" value="{{sotaRef}}"></paper-input>
+    <paper-input label="QSO exchange count (except RST)" value="{{exchCount}}"></paper-input>
     <paper-button raised on-click="convert">Convert</paper-button>
+    <paper-button raised on-click="clear">Clear</paper-button>
     <paper-textarea label="SOTA CSVv2" readonly rows="10" placeholder="Converted SOTA CSV will be shown here" value="[[csv]]"></paper-textarea>
     <!-- <p>
       Text: <span>{{text}}</span><br />
