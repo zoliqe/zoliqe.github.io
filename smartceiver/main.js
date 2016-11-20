@@ -78,7 +78,7 @@
     });
     
     tuneButton.textContent = 'TUNE';
-    tuneBotton.addEventListener('click', () => {
+    tuneButton.addEventListener('click', () => {
       tuning = !tuning;
       updateTune(tunning);
     });
