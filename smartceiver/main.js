@@ -79,7 +79,7 @@
     
     tuneButton.textContent = 'TUNE';
     tuneButton.addEventListener('click', () => {
-      tuning = !tuning;
+      tunning = !tunning;
       updateTune(tunning);
     });
 
