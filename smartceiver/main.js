@@ -7,6 +7,7 @@
   var threshold = 5;
   var wheelThreshold = 5;
   var wpm = 28;
+  var tunning = false;
 
   var port;
   var textEncoder = new TextEncoder();
@@ -21,6 +22,7 @@
   var wpmDec = document.getElementById('wpm-dec');
   var wpmInc = document.getElementById('wpm-inc');
   var wpmDisplay = document.getElementById('wpm-display');
+  var tuneButton = document.getElementById('tune-button');
   var startAngle = 0;
   var lastAngle = 0;
   var lastRotation = 0;
@@ -73,6 +75,12 @@
       if (wpm < 40) {
         updateWpm(++wpm);
       }
+    });
+    
+    tuneButton.textContent = 'TUNE';
+    tuneBotton.addEventListener('click', () => {
+      tuning = !tuning;
+      updateTune(tunning);
     });
 
     powerButton.textContent = 'ON';
@@ -213,6 +221,22 @@
     wpmDisplay.innerHTML = 'WPM: ' + wpm;
     if (self.port !== undefined) {
       let data = "KS" + wpm + ";";
+//       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
+//         if (info.error) {
+//           console.log("error sending: " + info.error);
+//         }
+//       });
+      self.port
+        .send(textEncoder.encode(data))
+        .catch(error => {
+        // TODO handle errors
+      });
+    }
+  }
+
+  function updateTune(tuning) {
+    if (self.port !== undefined) {
+      let data = "KT" + (tuning ? "1" : "0") + ";";
 //       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
 //         if (info.error) {
 //           console.log("error sending: " + info.error);
