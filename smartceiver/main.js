@@ -90,7 +90,7 @@
       xfilNarrow = !xfilNarrow;
       xfilButton.textContent = xfilNarrow ? 'NAR' : 'WIDE';
       updateXFil(xfilNarrow);
-    }
+    });
 
     powerButton.textContent = 'ON';
     powerButton.addEventListener('click', () => {
