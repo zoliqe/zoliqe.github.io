@@ -8,6 +8,7 @@
   var wheelThreshold = 5;
   var wpm = 28;
   var tunning = false;
+  var xfilNarrow = true;
 
   var port;
   var textEncoder = new TextEncoder();
@@ -23,6 +24,7 @@
   var wpmInc = document.getElementById('wpm-inc');
   var wpmDisplay = document.getElementById('wpm-display');
   var tuneButton = document.getElementById('tune-button');
+  var xfilButton = document.getElementById('xfil-button');
   var startAngle = 0;
   var lastAngle = 0;
   var lastRotation = 0;
@@ -82,6 +84,13 @@
       tunning = !tunning;
       updateTune(tunning);
     });
+    
+    xfilButton.textContent = 'NAR';
+    xfilButton.addEventListener('click', () => {
+      xfilNarrow = !xfilNarrow;
+      xfilButton.textContent = xfilNarrow ? 'NAR' : 'WIDE';
+      updateXFil(xfilNarrow);
+    }
 
     powerButton.textContent = 'ON';
     powerButton.addEventListener('click', () => {
@@ -237,6 +246,22 @@
   function updateTune(tuning) {
     if (self.port !== undefined) {
       let data = "KT" + (tuning ? "1" : "0") + ";";
+//       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
+//         if (info.error) {
+//           console.log("error sending: " + info.error);
+//         }
+//       });
+      self.port
+        .send(textEncoder.encode(data))
+        .catch(error => {
+        // TODO handle errors
+      });
+    }
+  }
+
+  function updateXFil(xfil) {
+    if (self.port !== undefined) {
+      let data = "RW" + (xfil ? "1" : "0") + ";";
 //       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
 //         if (info.error) {
 //           console.log("error sending: " + info.error);
