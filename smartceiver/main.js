@@ -174,9 +174,8 @@
 
   function switchStep() {
     // TODO add number underline
-//     currentStep++;
-    if (++currentStep >= steps.length) {
-      currentStep = 0;
+    if (++step >= steps.length) {
+      step = 0;
     }
   }
 
@@ -184,11 +183,9 @@
     if (self.port == undefined) {
       return;
     }
-//     currentBand++;
-    if (++currentBand >= bands.length) {
-      currentBand = 0;
+    if (++band >= bands.length) {
+      band = 0;
     }
-//     freq = bands[currentBand];
     updateFreq(0);
   }
 
