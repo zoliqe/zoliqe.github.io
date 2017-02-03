@@ -46,15 +46,15 @@
     bandDisplay.addEventListener("wheel", rotateByWheel);
     freqDisplay.addEventListener("wheel", rotateByWheel);
 
-    bandDisplay.addEventListener("click", event => switchBand);
-    freqDisplay.addEventListener("click", event => switchStep);
+    bandDisplay.addEventListener("click", event => switchBand());
+    freqDisplay.addEventListener("click", event => switchStep());
 
     ///
     wpmDec.addEventListener('click', event => updateWpm(-2));
     wpmInc.addEventListener('click', event => updateWpm(+2));
     
-    tuneButton.addEventListener('click', () => switchTunning);
-    xfilButton.addEventListener('click', () => switchXFil);
+    tuneButton.addEventListener('click', () => switchTunning());
+    xfilButton.addEventListener('click', () => switchXFil());
 
     powerButton.textContent = 'ON';
 //     switchPower(); // auto startup, disabled -requires user gesture
