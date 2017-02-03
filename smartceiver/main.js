@@ -11,8 +11,6 @@
   var xfilNarrow = true;
 
   var port;
-  var textEncoder = new TextEncoder();
-  var textDecoder = new TextDecoder();
   var buffer = "";
 
   var powerButton = document.getElementById('power-button');
@@ -218,11 +216,7 @@
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port
-        .send(textEncoder.encode(data))
-        .catch(error => {
-        // TODO handle errors
-      });
+      self.port.send(data);
     }
   }
 
@@ -235,11 +229,7 @@
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port
-        .send(textEncoder.encode(data))
-        .catch(error => {
-        // TODO handle errors
-      });
+      self.port.send(data);
     }
   }
 
@@ -251,11 +241,7 @@
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port
-        .send(textEncoder.encode(data))
-        .catch(error => {
-        // TODO handle errors
-      });
+      self.port.send(data);
     }
   }
 
@@ -267,11 +253,7 @@
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port
-        .send(textEncoder.encode(data))
-        .catch(error => {
-        // TODO handle errors
-      });
+      self.port.send(data);
     }
   }
 
@@ -322,7 +304,7 @@
       console.log('Connected ' + self.port);
       powerButton.textContent = 'OFF';
       port.onReceive = data => {
-        console.log('Received: ' + textDecoder.decode(data));
+        console.log('Received: ' + data);
       };
       port.onReceiveError = error => {
         console.log('Receive error: ' + error);
