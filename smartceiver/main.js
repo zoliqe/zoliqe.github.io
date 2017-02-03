@@ -57,7 +57,7 @@
     xfilButton.addEventListener('click', () => switchXFil());
 
     powerButton.textContent = 'ON';
-    switchPower(); // auto startup
+//     switchPower(); // auto startup, disabled -requires user gesture
     powerButton.addEventListener('click', () => switchPower());
   }
 
@@ -198,10 +198,10 @@
     }
     var freq = bands[band] + delta;
     bands[band] = freq; // store new freq of band
-    var band = Math.floor(freq / 1000000);
+    var mhz = Math.floor(freq / 1000000);
 //     console.log(band);
-    bandDisplay.innerHTML = band.toString();
-    var khz = (freq - band * 1000000) / 1000;
+    bandDisplay.innerHTML = mhz.toString();
+    var khz = (freq - mhz * 1000000) / 1000;
 //     console.log(khz);
     freqDisplay.innerHTML = '.';
     if (khz < 10) {
