@@ -123,6 +123,8 @@
       };
       updateFreq(0);
       updateWpm(0);
+      switchTunning();
+      switchXFil();
     }, error => {
        console.log('Connection error (2): ' + error);
     });
