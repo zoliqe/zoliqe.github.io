@@ -46,8 +46,8 @@
     bandDisplay.addEventListener("wheel", rotateByWheel);
     freqDisplay.addEventListener("wheel", rotateByWheel);
 
-    bandDisplay.innerHTML = ' ';
-    freqDisplay.innerHTML = ' ';
+    bandDisplay.innerHTML = '-';
+    freqDisplay.innerHTML = '-';
     bandDisplay.addEventListener("click", event => switchBand());
     freqDisplay.addEventListener("click", event => switchStep());
 
