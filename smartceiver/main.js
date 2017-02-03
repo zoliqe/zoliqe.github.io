@@ -53,8 +53,8 @@
     wpmDec.addEventListener('click', event => updateWpm(-2));
     wpmInc.addEventListener('click', event => updateWpm(+2));
     
-    tuneButton.addEventListener('click', () => switchTunning());
-    xfilButton.addEventListener('click', () => switchXFil());
+    tuneButton.addEventListener('click', () => switchTunning);
+    xfilButton.addEventListener('click', () => switchXFil);
 
     powerButton.textContent = 'ON';
 //     switchPower(); // auto startup, disabled -requires user gesture
