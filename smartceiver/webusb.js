@@ -2,6 +2,9 @@ var serial = {};
 
 (function() {
   'use strict';
+  
+  serial.encoder_ = new TextEncoder();
+  serial.decoder_ = new TextDecoder();
 
   serial.getPorts = function() {
     return navigator.usb.getDevices().then(devices => {
@@ -26,7 +29,7 @@ var serial = {};
   serial.Port.prototype.connect = function() {
     let readLoop = () => {
       this.device_.transferIn(5, 64).then(result => {
-        this.onReceive(result.data);
+        this.onReceive(serial.decoder_.decode(result.data));
         readLoop();
       }, error => {
         this.onReceiveError(error);
@@ -62,6 +65,6 @@ var serial = {};
   };
 
   serial.Port.prototype.send = function(data) {
-    return this.device_.transferOut(4, data);
+    return this.device_.transferOut(4, serial.encoder_.encode(data));
   };
 })();
