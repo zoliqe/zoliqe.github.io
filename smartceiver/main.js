@@ -1,14 +1,15 @@
 
   var bands = [3542000, 7030000, 10123000, 14060000, 18088000, 21060000];
   var steps = [10, 100, 1000];
-  var currentBand = 1;
-  var currentStep = 0;
-  var freq = bands[currentBand];
+  var band = 1;
+  var step = 0;
+//   var freq = bands[currentBand];
   var threshold = 5;
   var wheelThreshold = 5;
   var wpm = 28;
-  var tunning = false;
-  var xfilNarrow = true;
+  var tunning = true; // will be inverted after connect
+  var xfilNarrow = true; // will be inverted after connect
+// move defaults to init method and call it in connect()
 
   var port;
   var buffer = "";
@@ -34,8 +35,6 @@
 
   function start() {
     // console.log('startX: ' + startX + ', startY: ' + startY);
-    updateFreq(freq);
-
     circle.addEventListener("touchstart", function (e) {
       var touch = event.changedTouches.item(0);
       startAngle = Math.atan2(touch.pageY - startY, touch.pageX - startX) * 180 / Math.PI;
@@ -47,51 +46,22 @@
     bandDisplay.addEventListener("wheel", rotateByWheel);
     freqDisplay.addEventListener("wheel", rotateByWheel);
 
-    bandDisplay.addEventListener("click", event => {
-      currentBand++;
-      if (currentBand >= bands.length) {
-        currentBand = 0;
-      }
-      freq = bands[currentBand];
-      updateFreq(freq);
-    });
-
-    freqDisplay.addEventListener("click", event => {
-      // TODO add number underline
-      currentStep++;
-      if (currentStep >= steps.length) {
-        currentStep = 0;
-      }
-    });
+    bandDisplay.addEventListener("click", event => switchBand);
+    freqDisplay.addEventListener("click", event => switchStep);
 
     ///
-    updateWpm(wpm);
-    wpmDec.addEventListener('click', event => {
-      if (wpm > 10) {
-        updateWpm(--wpm);
-      }
-    });
-    wpmInc.addEventListener('click', event => {
-      if (wpm < 40) {
-        updateWpm(++wpm);
-      }
-    });
+    wpmDec.addEventListener('click', event => updateWpm(-2));
+    wpmInc.addEventListener('click', event => updateWpm(+2));
     
-    tuneButton.textContent = 'TUNE';
-    tuneButton.addEventListener('click', () => {
-      tunning = !tunning;
-      updateTune(tunning);
-    });
-    
-    xfilButton.textContent = 'NAR';
-    xfilButton.addEventListener('click', () => {
-      xfilNarrow = !xfilNarrow;
-      xfilButton.textContent = xfilNarrow ? 'NAR' : 'WIDE';
-      updateXFil(xfilNarrow);
-    });
+    tuneButton.addEventListener('click', () => switchTunning());
+    xfilButton.addEventListener('click', () => switchXFil());
 
     powerButton.textContent = 'ON';
-    powerButton.addEventListener('click', () => {
+    switchPower(); // auto startup
+    powerButton.addEventListener('click', () => switchPower());
+  }
+
+  function switchPower() {
       if (self.port) {
         self.port.disconnect();
         self.port = undefined;
@@ -138,6 +108,23 @@
           console.error('Connection error (1): ' + error);
         });
       }
+    }
+
+  function connect() {
+    console.log('Connecting to ' + self.port.device_.productName);
+    self.port.connect().then(() => {
+      console.log('Connected ' + self.port);
+      powerButton.textContent = 'OFF';
+      port.onReceive = data => {
+        console.log('Received: ' + data);
+      };
+      port.onReceiveError = error => {
+        console.log('Receive error: ' + error);
+      };
+      updateFreq(0);
+      updateWpm(0);
+    }, error => {
+       console.log('Connection error (2): ' + error);
     });
   }
 
@@ -173,19 +160,42 @@
   }
 
   function tune(rotation) {
-    // var delta = rotation - lastRotation;
-    var step = steps[currentStep];
-    freq = rotation - lastRotation > 0 ? freq + step : freq - step;
+    var delta = rotation - lastRotation > 0 ? steps[step] : 0 - steps[step];
+//     freq = rotation - lastRotation > 0 ? freq + delta : freq - delta;
+    updateFreq(delta);
+
     lastRotation = rotation;
-    if (port !== undefined) {
-      updateFreq(freq);
-    }
     var transform = "rotate(" + rotation + "deg)";
     // console.log(transform);
     circle.style.transform = transform;
   }
 
-  function updateFreq(freq) {
+  function switchStep() {
+    // TODO add number underline
+//     currentStep++;
+    if (++currentStep >= steps.length) {
+      currentStep = 0;
+    }
+  }
+
+  function switchBand() {
+    if (self.port == undefined) {
+      return;
+    }
+//     currentBand++;
+    if (++currentBand >= bands.length) {
+      currentBand = 0;
+    }
+//     freq = bands[currentBand];
+    updateFreq(0);
+  }
+
+  function updateFreq(delta) {
+    if (self.port == undefined) {
+      return;
+    }
+    var freq = bands[band] + delta;
+    bands[band] = freq; // store new freq of band
     var band = Math.floor(freq / 1000000);
 //     console.log(band);
     bandDisplay.innerHTML = band.toString();
@@ -205,56 +215,66 @@
       freqDisplay.innerHTML += '0';
     }
 
-    if (self.port !== undefined) {
-      let data = "FA000";
-      if (freq < 10000000) { // <10MHz
-          data += "0";
-      }
-      data += freq + ";";
+    let data = "FA000";
+    if (freq < 10000000) { // <10MHz
+        data += "0";
+    }
+    data += freq + ";";
 //       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
 //         if (info.error) {
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port.send(data);
-    }
+    self.port.send(data);
   }
 
-  function updateWpm(wpm) {
+  function updateWpm(change) {
+    if (self.port == undefined) {
+      return;
+    }
+    var newWpm = wpm + change;
+    if (newWpm < 10 || newWpm > 40) {
+      return;
+    }
+    wpm = newWpm;
     wpmDisplay.innerHTML = 'WPM: ' + wpm;
-    if (self.port !== undefined) {
-      let data = "KS" + wpm + ";";
+    let data = "KS" + wpm + ";";
 //       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
 //         if (info.error) {
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port.send(data);
-    }
+    self.port.send(data);
   }
 
-  function updateTune(tuning) {
-    if (self.port !== undefined) {
-      let data = "KT" + (tuning ? "1" : "0") + ";";
+  function switchTunning() {
+    if (self.port == undefined) {
+      return;
+    }
+    tunning = !tunning;
+    tuneButton.textContent = tunning ? 'STOP' : 'TUNE';
+    let data = "KT" + (tunning ? "1" : "0") + ";";
 //       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
 //         if (info.error) {
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port.send(data);
-    }
+    self.port.send(data);
   }
 
-  function updateXFil(xfil) {
-    if (self.port !== undefined) {
-      let data = "RW" + (xfil ? "1" : "0") + ";";
+  function switchXFil() {
+    if (self.port == undefined) {
+      return;
+    }
+    xfilNarrow = !xfilNarrow;
+    xfilButton.textContent = xfilNarrow ? 'NAR' : 'WIDE';
+    let data = "RW" + (xfilNarrow ? "1" : "0") + ";";
 //       chrome.serial.send(self.port, convertStringToArrayBuffer(data), (info) => {
 //         if (info.error) {
 //           console.log("error sending: " + info.error);
 //         }
 //       });
-      self.port.send(data);
-    }
+    self.port.send(data);
   }
 
 //   function onReceive(receiveInfo) {
@@ -297,22 +317,6 @@
 //     }
 //     return buf;
 //   }
-
-  function connect() {
-    console.log('Connecting to ' + self.port.device_.productName);
-    self.port.connect().then(() => {
-      console.log('Connected ' + self.port);
-      powerButton.textContent = 'OFF';
-      port.onReceive = data => {
-        console.log('Received: ' + data);
-      };
-      port.onReceiveError = error => {
-        console.log('Receive error: ' + error);
-      };
-    }, error => {
-       console.log('Connection error (2): ' + error);
-    });
-  }
 
 window.onload = function() {
   start();
