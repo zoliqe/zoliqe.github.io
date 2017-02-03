@@ -46,6 +46,8 @@
     bandDisplay.addEventListener("wheel", rotateByWheel);
     freqDisplay.addEventListener("wheel", rotateByWheel);
 
+    bandDisplay.innerHTML = ' ';
+    freqDisplay.innerHTML = ' ';
     bandDisplay.addEventListener("click", event => switchBand());
     freqDisplay.addEventListener("click", event => switchStep());
 
@@ -200,7 +202,7 @@
     bandDisplay.innerHTML = mhz.toString();
     var khz = (freq - mhz * 1000000) / 1000;
 //     console.log(khz);
-    freqDisplay.innerHTML = '.';
+    freqDisplay.innerHTML = '';
     if (khz < 10) {
       freqDisplay.innerHTML += '0';
     }
