@@ -3,6 +3,7 @@
   "short_name": "Smartceiver",
   "start_url": "/?homescreen=1",
   "display": "standalone",
+  "orientation": "landscape",
   "theme_color": "#3f51b5",
   "background_color": "#3f51b5",
   "icons": [

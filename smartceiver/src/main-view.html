@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --app-grid-gutter: 2px;
       }
 
-      @media (max-width: 640px) {
+      @media (max-width: 720px) {
         :host {
           --app-grid-columns: 1;
         }
@@ -37,10 +37,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: lightgray;/*#09f*/
         background: radial-gradient(circle, darkgray, black);
         /*margin: 20px auto;*/
-        margin-left: 15px;
-        width: 340px;
-        height: 340px;
-        border-radius: 170px;
+        margin-left: 10px;
+        width: 300px;
+        height: 300px;
+        border-radius: 150px;
       }
       div.dimp {
         position: absolute;
@@ -48,11 +48,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background: radial-gradient(circle, #3d3d3d, #1e1e1e);
         margin: 15px auto;
         left: 50%;
-        width: 70px;
-        height: 70px;
-        border-radius: 35px;
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
       }
 
+      paper-button {
+        font-size: 14pt;
+        font-weight: bold;
+        color: white;
+        margin: 5px;
+
+      }
       paper-button.toggles[active] {
         background-color: var(--paper-green-500);
       }
@@ -61,10 +68,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       paper-button.toggles {
         background-color: var(--paper-red-800);
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        margin: 5px;
       }
       paper-button.toggles:hover {
         background-color: var(--paper-red-700);
@@ -72,14 +75,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       paper-button.wpm {
         background-color: var(--paper-indigo-800);
-        color: white;
         --paper-button-raised-keyboard-focus: {
           background-color: var(--paper-pink-a200) !important;
           color: white !important;
         };
-        font-size: 18pt;
-        font-weight: bold;
-        margin: 5px;
       }
       paper-button.wpm[disabled] {
         background-color: lightgray;
