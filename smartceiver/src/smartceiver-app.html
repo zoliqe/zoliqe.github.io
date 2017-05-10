@@ -6,9 +6,7 @@ The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
+--><html><head><link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
@@ -27,7 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="cwmem-view.html">
 <link rel="import" href="error404-view.html">
 
-<dom-module id="smartceiver-app">
+</head><body><dom-module id="smartceiver-app">
   <template>
     <style>
       :host {
@@ -82,16 +80,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-location route="/smartceiver/{{route}}"></app-location>
-    <app-route
-        route="/smartceiver/{{route}}"
-        pattern="/:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/smartceiver/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
-    <app-drawer-layout fullbleed responsive-width="1024px">
+    <app-drawer-layout fullbleed="" responsive-width="1024px">
       <!-- Drawer content -->
-      <app-drawer id="drawer" slot="drawer" swipe-open>
+      <app-drawer id="drawer" slot="drawer" swipe-open="">
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="tune" href="/smartceiver/tune">Control</a>
@@ -102,21 +96,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
+      <app-header-layout has-scrolling-region="">
 
-        <app-header slot="header" condenses reveals effects="waterfall">
+        <app-header slot="header" condenses="" reveals="" effects="waterfall">
           <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title class="freq-display">[[freqDisplay]]</div>
+            <paper-icon-button icon="menu" drawer-toggle=""></paper-icon-button>
+            <div main-title="" class="freq-display">[[freqDisplay]]</div>
             <paper-icon-button icon="power-settings-new" on-tap="switchPower"></paper-icon-button>
           </app-toolbar>
         </app-header>
 
-        <iron-pages
-            selected="[[page]]"
-            attr-for-selected="name"
-            fallback-selection="error404"
-            role="main">
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="error404" role="main">
           <main-view name="tune" freq="{{tcvr.freq}}" narrow="{{tcvr.narrow}}" wpm="{{tcvr.wpm}}"></main-view>
           <!--<setuprx-view name="setup-rx"></setuprx-view>-->
           <setuptx-view name="settings" tx-enabled="{{tcvr.txEnabled}}" tx-keyed="{{tcvr.txKeyed}}" auto-space="{{tcvr.autoSpace}}"></setuptx-view>
@@ -193,7 +183,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // If no page was found in the route data, page will be an empty string.
         // Deault to 'main' in that case.
-        this.page = page || 'main';
+        console.log("page=" + page);
+        this.page = page || 'tune';
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
@@ -219,3 +210,4 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     window.customElements.define(SmartceiverApp.is, SmartceiverApp);
   </script>
 </dom-module>
+</body></html>
