@@ -82,9 +82,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-location route="{{route}}"></app-location>
+    <app-location route="/smartceiver/{{route}}"></app-location>
     <app-route
-        route="{{route}}"
+        route="/smartceiver/{{route}}"
         pattern="/:page"
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
@@ -94,10 +94,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer id="drawer" slot="drawer" swipe-open>
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="main" href="/smartceiver/main">Control</a>
+          <a name="tune" href="/smartceiver/tune">Control</a>
           <!--<a name="setup-rx" href="/setup-rx">Setup RX</a>-->
-          <a name="setup-tx" href="/smartceiver/setup-tx">Settings</a>
-          <a name="cw-mem" href="/smartceiver/cw-mem">CW Memories</a>
+          <a name="settings" href="/smartceiver/settings">Settings</a>
+          <a name="cwmem" href="/smartceiver/cwmem">CW Memories</a>
         </iron-selector>
       </app-drawer>
 
@@ -117,10 +117,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             attr-for-selected="name"
             fallback-selection="error404"
             role="main">
-          <main-view name="main" freq="{{tcvr.freq}}" narrow="{{tcvr.narrow}}" wpm="{{tcvr.wpm}}"></main-view>
+          <main-view name="tune" freq="{{tcvr.freq}}" narrow="{{tcvr.narrow}}" wpm="{{tcvr.wpm}}"></main-view>
           <!--<setuprx-view name="setup-rx"></setuprx-view>-->
-          <setuptx-view name="setup-tx" tx-enabled="{{tcvr.txEnabled}}" tx-keyed="{{tcvr.txKeyed}}" auto-space="{{tcvr.autoSpace}}"></setuptx-view>
-          <cwmem-view name="cw-mem"></cwmem-view>
+          <setuptx-view name="settings" tx-enabled="{{tcvr.txEnabled}}" tx-keyed="{{tcvr.txKeyed}}" auto-space="{{tcvr.autoSpace}}"></setuptx-view>
+          <cwmem-view name="cwmem"></cwmem-view>
           <error404-view name="error404"></error404-view>
         </iron-pages>
       </app-header-layout>
