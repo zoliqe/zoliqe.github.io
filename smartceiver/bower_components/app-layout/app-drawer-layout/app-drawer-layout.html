@@ -6,7 +6,9 @@ The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
---><html><head><link rel="import" href="../../polymer/polymer.html">
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-media-query/iron-media-query.html">
 <link rel="import" href="../app-layout-behavior/app-layout-behavior.html">
 
@@ -118,7 +120,7 @@ Custom property                          | Description                          
 @demo app-drawer-layout/demo/two-drawers.html Two drawers
 -->
 
-</head><body><dom-module id="app-drawer-layout">
+<dom-module id="app-drawer-layout">
   <template>
     <style>
       :host {
@@ -154,7 +156,9 @@ Custom property                          | Description                          
       <slot></slot>
     </div>
 
-    <iron-media-query query="[[_computeMediaQuery(forceNarrow, responsiveWidth)]]" on-query-matches-changed="_onQueryMatchesChanged"></iron-media-query>
+    <iron-media-query
+        query="[[_computeMediaQuery(forceNarrow, responsiveWidth)]]"
+        on-query-matches-changed="_onQueryMatchesChanged"></iron-media-query>
   </template>
 
   <script>
@@ -289,4 +293,3 @@ Custom property                          | Description                          
     });
   </script>
 </dom-module>
-</body></html>
