@@ -82,10 +82,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-location route="/smartceiver/{{route}}"></app-location>
+    <app-location route="{{route}}"></app-location>
     <app-route
         route="{{route}}"
-        pattern="/:page"
+        pattern="/smartceiver/:page"
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
