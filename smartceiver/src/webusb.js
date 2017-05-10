@@ -1,1 +1,70 @@
-var webusb={};(function(){'use strict';webusb.encoder_=new TextEncoder,webusb.decoder_=new TextDecoder,webusb.getPorts=function(){return navigator.usb.getDevices().then(a=>{return a.map(b=>new webusb.Port(b))})},webusb.requestPort=function(){return navigator.usb.requestDevice({filters:[{vendorId:9025,productId:32822},{vendorId:9025,productId:32823}]}).then(b=>new webusb.Port(b))},webusb.Port=function(a){this.device_=a},webusb.Port.prototype.connect=function(){let a=()=>{this.device_.transferIn(5,64).then(b=>{this.onReceive(webusb.decoder_.decode(b.data)),a()},b=>{this.onReceiveError(b)})};return this.device_.open().then(()=>{if(null===this.device_.configuration)return this.device_.selectConfiguration(1)}).then(()=>this.device_.claimInterface(2)).then(()=>this.device_.controlTransferOut({requestType:'class',recipient:'interface',request:34,value:1,index:2})).then(()=>{a()})},webusb.Port.prototype.disconnect=function(){return this.device_.controlTransferOut({requestType:'class',recipient:'interface',request:34,value:0,index:2}).then(()=>this.device_.close())},webusb.Port.prototype.send=function(a){return this.device_.transferOut(4,webusb.encoder_.encode(a))}})();
+var webusb = {};
+
+(function() {
+  'use strict';
+  
+  webusb.encoder_ = new TextEncoder();
+  webusb.decoder_ = new TextDecoder();
+
+  webusb.getPorts = function() {
+    return navigator.usb.getDevices().then(devices => {
+      return devices.map(device => new webusb.Port(device));
+    });
+  };
+
+  webusb.requestPort = function() {
+    const filters = [
+      { 'vendorId': 0x2341, 'productId': 0x8036 },
+      { 'vendorId': 0x2341, 'productId': 0x8037 },
+    ];
+    return navigator.usb.requestDevice({ 'filters': filters }).then(
+      device => new webusb.Port(device)
+    );
+  }
+
+  webusb.Port = function(device) {
+    this.device_ = device;
+  };
+
+  webusb.Port.prototype.connect = function() {
+    let readLoop = () => {
+      this.device_.transferIn(5, 64).then(result => {
+        this.onReceive(webusb.decoder_.decode(result.data));
+        readLoop();
+      }, error => {
+        this.onReceiveError(error);
+      });
+    };
+
+    return this.device_.open()
+        .then(() => {
+          if (this.device_.configuration === null) {
+            return this.device_.selectConfiguration(1);
+          }
+        })
+        .then(() => this.device_.claimInterface(2))
+        .then(() => this.device_.controlTransferOut({
+            'requestType': 'class',
+            'recipient': 'interface',
+            'request': 0x22,
+            'value': 0x01,
+            'index': 0x02}))
+        .then(() => {
+          readLoop();
+        });
+  };
+
+  webusb.Port.prototype.disconnect = function() {
+    return this.device_.controlTransferOut({
+            'requestType': 'class',
+            'recipient': 'interface',
+            'request': 0x22,
+            'value': 0x00,
+            'index': 0x02})
+        .then(() => this.device_.close());
+  };
+
+  webusb.Port.prototype.send = function(data) {
+    return this.device_.transferOut(4, webusb.encoder_.encode(data));
+  };
+})();
