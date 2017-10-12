@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>TCVR RTC</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>  
+
+  <style>
+    ul {
+      list-style-type: none;
+    }
+  </style>
+</head>
+<body>
+  <audio autoplay controls id="rx"></audio>
+  <script>
+    let rx = document.getElementById('rx');
+    var peer = new Peer({key: 'sgw45511v1qt1emi'});
+
+    navigator.getUserMedia({audio: true, video: false}, 
+        (stream) => {
+          let call = peer.call('tcvr', stream);
+          call.on('stream', (remoteStream) => rx.src = URL.createObjectURL(remoteStream));
+        }, 
+        (err) => console.log("getUserMedia() failed ", err));
+  </script>
+</body>
+</html>
