@@ -8,22 +8,35 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-  <script src="peer.min.js"></script>  
+  <!-- <script src="peer.min.js"></script>   -->
+  <script src="https://simplewebrtc.com/latest-v2.js"></script>
 
   <style>
-    ul {
-      list-style-type: none;
+    #remoteVideos video {
+      height: 150px;
+    }
+    #localVideo {
+        height: 150px;
     }
   </style>
 </head>
 <body>
+  <video id="localVideo"></video>
+  <div id="remoteVideos"></div>
+  
   <script>
-    var peer = new Peer('tcvr', {key: 'sgw45511v1qt1emi'});
-    peer.on('call', (call) => {
-      navigator.getUserMedia({audio: true, video: false}, 
-        (stream) => call.answer(stream), // TODO add TX stream 
-        (err) => console.log("getUserMedia() failed ", err));
+    // var peer = new Peer('tcvr', {key: 'sgw45511v1qt1emi'});
+    // peer.on('call', (call) => {
+    //   navigator.getUserMedia({audio: true, video: false}, 
+    //     (stream) => call.answer(stream), // TODO add TX stream 
+    //     (err) => console.log("getUserMedia() failed ", err));
+    // });
+    var webrtc = new SimpleWebRTC({
+      localVideoEl: 'localVideo',
+      remoteVideosEl: 'remoteVideos',
+      autoRequestMedia: true
     });
+    webrtc.on('readyToCall', () => webrtc.joinRoom('om3rrc'));
   </script>
 </body>
 </html>
