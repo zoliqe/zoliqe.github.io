@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>WebRTC screencast</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <script src="https://simplewebrtc.com/latest-v2.js"></script>
+
+  <style>
+    #remoteVideos video {
+      height: 150px;
+    }
+    #localVideo {
+        height: 150px;
+    }
+  </style>
+</head>
+<body>
+  <video id="localVideo"></video>
+  <div id="remoteVideos"></div>
+  
+  <script>
+    var webrtc = new SimpleWebRTC({
+      localVideoEl: 'localVideo',
+      remoteVideosEl: 'remoteVideos',
+      autoRequestMedia: true
+    });
+    webrtc.on('readyToCall', () => webrtc.joinRoom('om3rrc'));
+    webrtc.shareScreen((res) => console.log("shareScreen(): ", err));
+  </script>
+</body>
+</html>
