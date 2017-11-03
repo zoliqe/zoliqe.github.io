@@ -41,7 +41,14 @@
       receiveMedia: { offerToReceiveAudio: 1, offerToReceiveVideo: 0 },
       nick: 'tcvr'
     });
-    webrtc.on('readyToCall', () => webrtc.joinRoom('k2-om4aa'));
+    webrtc.on('readyToCall', () => webrtc.joinRoom('k2-om4aa', (err, room) => {
+      if (err) {
+        console.log("error: " + err);
+      } else {
+        console.log("connect ok");
+        webrtc.pauseVideo();
+      }
+    }));
     webrtc.on('channelMessage', (peer, label, data) => {
       // e.g. we want label "hark" to be ignored, as it fires continiously.
       if (label == 'hark') {
