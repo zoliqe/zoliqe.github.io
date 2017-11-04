@@ -18,7 +18,7 @@
   </style>
 </head>
 <body>
-  <span>v3</span><br>
+  <span>v4</span><br>
   <button onclick="connect()">Connect radio</button>
   <span id="connstate"></span>
   <video id="localVideo"></video>
@@ -88,9 +88,12 @@
           clearTimeout(timer);
         } else {
           stream.mute();
+          console.log('muted');
         }
         timer = setTimeout(function() {
           stream.unmute();
+          timer = undefined;
+          console.log('unmuted');
         }, 300);
       }
       return timer;
