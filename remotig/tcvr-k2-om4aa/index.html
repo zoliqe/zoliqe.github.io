@@ -18,7 +18,7 @@
   </style>
 </head>
 <body>
-  <span>v4</span><br>
+  <span>v5</span><br>
   <button onclick="connect()">Connect radio</button>
   <span id="connstate"></span>
   <video id="localVideo"></video>
@@ -75,28 +75,28 @@
         if (data.type == 'ctl') {
           console.log(data.payload.msg);
           if (port) {
-            muteTimer = handleMuting(data.payload.msg, muteTimer, webrtc);
+            handleMuting(data.payload.msg);
             port.send(data.payload.msg);
           }
         }
       }
     });
 
-    function handleMuting(cmd, timer, stream) {
+    function handleMuting(cmd) {
       if (cmd == '.;' || cmd == '-;') {
-        if (timer) { // already muted, only reset timer
-          clearTimeout(timer);
+        if (muteTimer) { // already muted, only reset timer
+          clearTimeout(muteTimer);
         } else {
-          stream.mute();
+          webrtc.mute();
           console.log('muted');
         }
-        timer = setTimeout(function() {
-          stream.unmute();
+        muteTimer = setTimeout(function() {
+          webrtc.unmute();
           muteTimer = undefined;
           console.log('unmuted');
-        }, 300);
+        }, 400);
       }
-      return timer;
+      // return timer;
     }
   </script>
 </body>
