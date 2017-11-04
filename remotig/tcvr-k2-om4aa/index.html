@@ -18,20 +18,35 @@
   </style>
 </head>
 <body>
-  <span>v2</span><br>
+  <span>v3</span><br>
   <button onclick="connect()">Connect radio</button>
+  <span id="connstate"></span>
   <video id="localVideo"></video>
   <div id="remoteVideos"></div>
   
   <script>
-    var port = undefined;
+    let connstate = document.getElementById('connstate');
+    connstate.innerHTML = 'Not connected';
+
+    let port = undefined;
     function connect() {
       console.log('connect');
-      connector.connect((p) => {
+      connector.connect(p => {
         console.log('port: ' + p);
         port = p;
+        connstate.innerHTML = 'OK Connected';
+      },
+      rcvErr => {
+        connstate.innerHTML = 'ReceiveError: ' + rcvErr;
+        port = undefined;
+      },
+      err => {
+        connstate.innerHTML = 'Error: ' + err;
+        port = undefined;
       });
     }
+
+    let muteTimer = undefined;
 
     let webrtc = new SimpleWebRTC({
       localVideoEl: 'localVideo',
@@ -58,14 +73,28 @@
 
       if (label == 'meta') {
         if (data.type == 'ctl') {
-          // do your stuff
           console.log(data.payload.msg);
           if (port) {
+            muteTimer = handleMuting(data.payload.msg, muteTimer, webrtc);
             port.send(data.payload.msg);
           }
         }
       }
     });
+
+    function handleMuting(cmd, timer, stream) {
+      if (cmd == '.;' || cmd == '-;') {
+        if (timer) { // already muted, only reset timer
+          clearTimeout(timer);
+        } else {
+          stream.mute();
+        }
+        timer = setTimeout(function() {
+          stream.unmute();
+        }, 300);
+      }
+      return timer;
+    }
   </script>
 </body>
 </html>
