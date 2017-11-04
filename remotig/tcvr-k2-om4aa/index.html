@@ -92,7 +92,7 @@
         }
         timer = setTimeout(function() {
           stream.unmute();
-          timer = undefined;
+          muteTimer = undefined;
           console.log('unmuted');
         }, 300);
       }
