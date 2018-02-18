@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+Copyright 2012 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Author: Eric Bidelman (ericbidelman@chromium.org)
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+<title>Web Audio API createMediaSourceElement() Example</title>
+<!--<link href="http://fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet" type="text/css">-->
+<link href="http://html5-demos.appspot.com/static/common.css" rel="stylesheet" type="text/css">
+<style>
+html, body {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+#fft {
+  border-color: gray;
+  border-width: 2px;
+  border-style: solid;
+}
+aside {
+  position: absolute;
+  left: 1em;
+  top: 3em;
+  z-index: 10;
+}
+label {
+  cursor: pointer;
+}
+#myaudio {
+  -webkit-transition: all 0.3s ease-in-out;
+}
+</style>
+</head>
+<body>
+
+<aside>
+  <button id="toggle">START</button>
+  <div id="myaudio"></div>
+</aside>
+
+<section>
+  <div>
+    <canvas id="fft" class="fft" width="1024" height="260"></canvas>
+  </div>
+</section>
+<script>
+// (function() {
+const audioCtx = new AudioContext();
+const analyser = audioCtx.createAnalyser();
+
+const canvas = document.getElementById('fft');
+const ctx = canvas.getContext('2d');
+canvas.width = analyser.frequencyBinCount //document.body.clientWidth //1.4;
+canvas.top = document.body.clientHeight - 50 - 260
+
+const CANVAS_HEIGHT = canvas.height;
+const CANVAS_WIDTH = canvas.width;
+
+const toggle = document.getElementById('toggle')
+// window.audio = new Audio();
+//audio.src = 'test.ogg'; // http://html5-demos.appspot.com/static/webaudio/
+// audio.controls = true;
+//audio.autoplay = true;
+//audio.loop = true;
+
+// document.querySelector('#myaudio').appendChild(audio);
+
+toggle.addEventListener('click', (e) => {
+  navigator.mediaDevices.getUserMedia({audio: true, video: false})
+    .then((stream) => {
+      // audio.srcObject = stream
+      const source = audioCtx.createMediaStreamSource(stream)
+      const lpf1 = audioCtx.createBiquadFilter()
+      const lpf2 = audioCtx.createBiquadFilter()
+      const lpf3 = audioCtx.createBiquadFilter()
+      const lpf4 = audioCtx.createBiquadFilter()
+      const hpf = audioCtx.createBiquadFilter()
+      const filter = audioCtx.createBiquadFilter()
+      lpf1.type = 'lowpass'
+      lpf1.frequency.setValueAtTime(1500, 0)
+      lpf1.Q.setValueAtTime(2, 0)
+      lpf2.type = 'lowpass'
+      lpf2.frequency.setValueAtTime(1500, 0)
+      lpf2.Q.setValueAtTime(2, 0)
+      lpf3.type = 'lowpass'
+      lpf3.frequency.setValueAtTime(1500, 0)
+      lpf3.Q.setValueAtTime(2, 0)
+      lpf4.type = 'lowpass'
+      lpf4.frequency.setValueAtTime(1500, 0)
+      lpf4.Q.setValueAtTime(2, 0)
+      hpf.type = 'highpass'
+      hpf.frequency.setValueAtTime(300, 0)
+      filter.type = 'bandpass'
+      filter.frequency.setValueAtTime(600, 0)
+      filter.Q.setValueAtTime(600 / 600, 0)
+      source.connect(analyser)
+      analyser.connect(lpf1)
+      lpf1.connect(lpf2)
+      lpf2.connect(lpf3)
+      lpf3.connect(lpf4)
+      lpf4.connect(hpf)
+      hpf.connect(filter)
+      filter.connect(audioCtx.destination)
+    
+      rafCallback()
+    })
+})
+
+function rafCallback(time) {
+  window.requestAnimationFrame(rafCallback, canvas);
+
+  let freqByteData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(freqByteData); //analyser.getByteTimeDomainData(freqByteData);
+  // console.log("binCount=" + analyser.frequencyBinCount)
+
+  const SPACER_WIDTH = 1;
+  const BAR_WIDTH = 1;
+  const OFFSET = 0;
+  // var numBars = Math.round(CANVAS_WIDTH / SPACER_WIDTH);
+
+  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  ctx.fillStyle = '#AA5E8C';
+  ctx.lineCap = 'round';
+
+  ctx.fillRect(10, CANVAS_HEIGHT, 63, -CANVAS_HEIGHT) // fc=9.5kHz, 2.4kHz wide
+  ctx.fillStyle = '#5A7EDC';
+  for (let i = 0; i < analyser.frequencyBinCount; ++i) {
+    const magnitude = freqByteData[i];
+    ctx.fillRect(i * SPACER_WIDTH, CANVAS_HEIGHT, BAR_WIDTH, -magnitude);
+  }
+}
+</script>
+</body>
+</html>
