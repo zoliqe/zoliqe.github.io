@@ -9,25 +9,36 @@ html, body {
   overflow: hidden;
   margin: 0;
   padding: 0;
+  background-color: #afafaf;
 }
 #fft {
   border-color: gray;
   border-width: 2px;
   border-style: solid;
-}
-aside {
+  top: 36px;
+/*}*/
+/*#controls {*/
   position: absolute;
-  left: 1em;
-  top: 3em;
-  z-index: 10;
+  /*left: 0em;*/
+  /*top: 0em;*/
+  padding: 2px;
+  width: 100%;
+  background-color: #505050;
+  color: #cfcfcf;
+  /*z-index: 10;*/
 }
 </style>
 </head>
 <body>
 
-<aside>
-  <button id="toggle">START</button>
-</aside>
+<div id="controls">
+  <button id="active">ON</button>
+  <label for="bandwidth">BW</label>
+  <input id="bandwidth" value="600" type="range" min="100" max="2400" step="100"/>
+  <span id="bwValue"></span>
+  <!--<label for="Q">Q</label>-->
+  <!--<input id="Q" value="2" type="range" min="0.5" max="5" step="0.5"/>-->
+</div>
 
 <section>
   <div>
@@ -35,81 +46,141 @@ aside {
   </div>
 </section>
 <script>
-const audioCtx = new AudioContext();
-const analyser = audioCtx.createAnalyser();
-
-const canvas = document.getElementById('fft');
-const ctx = canvas.getContext('2d');
-canvas.width = analyser.frequencyBinCount //document.body.clientWidth //1.4;
+const canvas = document.getElementById('fft')
+const ctx = canvas.getContext('2d')
+canvas.width = document.body.clientWidth
 canvas.top = document.body.clientHeight - 50 - 260
 
-const CANVAS_HEIGHT = canvas.height;
-const CANVAS_WIDTH = canvas.width;
+let active = false
+let audioCtx = null
+let analyser = null
+let audioStream = null
+const filterArray = []
+const filterCount = 10
+// let bpf1 = null
+// let bpf2 = null
 
-const toggle = document.getElementById('toggle')
+const CANVAS_HEIGHT = canvas.height
+const CANVAS_WIDTH = canvas.width
+const Q = 2
+// const centerFreq = 600
+// const cutoffFreq = 2400
+const cutoffDiv = 2
 
-toggle.addEventListener('click', (e) => {
+// controls
+const activeBtn = document.getElementById('active')
+const bwSlider = document.getElementById('bandwidth')
+const bwValue = document.getElementById('bwValue')
+bwValue.innerHTML = bwSlider.value - 300
+// const qSlider = document.getElementById('Q')
+
+activeBtn.addEventListener('click', (e) => {
+  active = !active
+  activeBtn.innerHTML = active ? "OFF" : "ON"
+  if (!active) {
+    if (audioStream) {
+      audioStream.getTracks().forEach((track) => track.stop())
+      audioStream = null
+    }
+    return
+  }
   navigator.mediaDevices.getUserMedia({audio: true, video: false})
     .then((stream) => {
-      // audio.srcObject = stream
-      const source = audioCtx.createMediaStreamSource(stream)
-      const lpf1 = audioCtx.createBiquadFilter()
-      const lpf2 = audioCtx.createBiquadFilter()
-      const lpf3 = audioCtx.createBiquadFilter()
-      const lpf4 = audioCtx.createBiquadFilter()
-      const hpf = audioCtx.createBiquadFilter()
-      const filter = audioCtx.createBiquadFilter()
-      lpf1.type = 'lowpass'
-      lpf1.frequency.setValueAtTime(1500, 0)
-      lpf1.Q.setValueAtTime(2, 0)
-      lpf2.type = 'lowpass'
-      lpf2.frequency.setValueAtTime(1500, 0)
-      lpf2.Q.setValueAtTime(2, 0)
-      lpf3.type = 'lowpass'
-      lpf3.frequency.setValueAtTime(1500, 0)
-      lpf3.Q.setValueAtTime(2, 0)
-      lpf4.type = 'lowpass'
-      lpf4.frequency.setValueAtTime(1500, 0)
-      lpf4.Q.setValueAtTime(2, 0)
-      hpf.type = 'highpass'
-      hpf.frequency.setValueAtTime(300, 0)
-      filter.type = 'bandpass'
-      filter.frequency.setValueAtTime(600, 0)
-      filter.Q.setValueAtTime(600 / 600, 0)
-      source.connect(analyser)
-      analyser.connect(lpf1)
-      lpf1.connect(lpf2)
-      lpf2.connect(lpf3)
-      lpf3.connect(lpf4)
-      lpf4.connect(hpf)
-      hpf.connect(filter)
-      filter.connect(audioCtx.destination)
+      audioStream = stream
+      audioCtx = new AudioContext()
+      analyser = audioCtx.createAnalyser()
+      canvas.width = analyser.frequencyBinCount / cutoffDiv //document.body.clientWidth //1.4;
+      audioCtx.createMediaStreamSource(audioStream).connect(analyser)
+      buildFilterChain()
     
       rafCallback()
     })
 })
 
+bwSlider.addEventListener('input', (e) => {
+  bwValue.innerHTML = bwSlider.value - 300
+  updateFilter()
+})
+
+function buildFilterChain() {
+  console.log("building " + filterCount + " filters...")
+  // const lpf1 = audioCtx.createBiquadFilter()
+  // const lpf2 = audioCtx.createBiquadFilter()
+  // const lpf3 = audioCtx.createBiquadFilter()
+  // const lpf4 = audioCtx.createBiquadFilter()
+  const hpf = audioCtx.createBiquadFilter()
+  // bpf1 = audioCtx.createBiquadFilter()
+  // bpf2 = audioCtx.createBiquadFilter()
+
+  // lpf1.type = 'lowpass'
+  // lpf1.frequency.setValueAtTime(cutoffFreq, 0)
+  // lpf1.Q.setValueAtTime(Q, 0)
+  // lpf2.type = 'lowpass'
+  // lpf2.frequency.setValueAtTime(cutoffFreq, 0)
+  // lpf2.Q.setValueAtTime(Q, 0)
+  // lpf3.type = 'lowpass'
+  // lpf3.frequency.setValueAtTime(cutoffFreq, 0)
+  // lpf3.Q.setValueAtTime(Q, 0)
+  // lpf4.type = 'lowpass'
+  // lpf4.frequency.setValueAtTime(cutoffFreq, 0)
+  // lpf4.Q.setValueAtTime(Q, 0)
+  hpf.type = 'highpass'
+  hpf.frequency.setValueAtTime(300, 0)
+  // bpf1.type = 'bandpass'
+  // bpf2.type = 'bandpass'
+  for (let i = 0; i < filterCount; i++) {
+    const filter = audioCtx.createBiquadFilter()
+    filterArray[i] = filter
+    filter.type = 'lowpass'
+    if (i > 0) {
+      filterArray[i - 1].connect(filter)
+    }
+  }
+  updateFilter()
+
+  analyser.connect(hpf)
+  // lpf1.connect(lpf2)
+  // lpf2.connect(lpf3)
+  // lpf3.connect(lpf4)
+  // lpf4.connect(hpf)
+  // hpf.connect(bpf1)
+  hpf.connect(filterArray[0])
+  // bpf1.connect(bpf2)
+  // bpf2.connect(audioCtx.destination)
+  filterArray[filterCount - 1].connect(audioCtx.destination)
+  console.log("filters build done")
+}
+
+function updateFilter() {
+  const bandwidth = bwSlider.value
+  console.log("bandwidth=" + bandwidth)
+  for (let i = 0; i < filterCount; i++) {
+    const filter = filterArray[i]
+    filter.frequency.setValueAtTime(bandwidth, 0)
+    filter.Q.setValueAtTime(Q/*centerFreq / bandwidth*/, 0)
+  }
+  // bpf1.frequency.setValueAtTime(centerFreq, 0)
+  // bpf1.Q.setValueAtTime(centerFreq / bandwidth, 0)
+  // bpf2.frequency.setValueAtTime(centerFreq, 0)
+  // bpf2.Q.setValueAtTime(centerFreq / bandwidth, 0)
+}
+
 function rafCallback(time) {
-  window.requestAnimationFrame(rafCallback, canvas);
+  window.requestAnimationFrame(rafCallback, canvas)
 
-  let freqByteData = new Uint8Array(analyser.frequencyBinCount);
-  analyser.getByteFrequencyData(freqByteData); //analyser.getByteTimeDomainData(freqByteData);
-  // console.log("binCount=" + analyser.frequencyBinCount)
-
-  const SPACER_WIDTH = 1;
-  const BAR_WIDTH = 1;
-  const OFFSET = 0;
+  let freqByteData = new Uint8Array(analyser.frequencyBinCount)
+  analyser.getByteFrequencyData(freqByteData) //analyser.getByteTimeDomainData(freqByteData);
   // var numBars = Math.round(CANVAS_WIDTH / SPACER_WIDTH);
 
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  ctx.fillStyle = '#AA5E8C';
+  ctx.fillStyle = '#CA5E8C';
   ctx.lineCap = 'round';
-
-  ctx.fillRect(10, CANVAS_HEIGHT, 63, -CANVAS_HEIGHT) // fc=9.5kHz, 2.4kHz wide
+  ctx.fillRect(10, CANVAS_HEIGHT, bwSlider.value / 30 + 10, -CANVAS_HEIGHT) // fc=9.5kHz, 2.4kHz wide
+  
   ctx.fillStyle = '#5A7EDC';
-  for (let i = 0; i < analyser.frequencyBinCount; ++i) {
+  for (let i = 0; i < analyser.frequencyBinCount / cutoffDiv; ++i) {
     const magnitude = freqByteData[i];
-    ctx.fillRect(i * SPACER_WIDTH, CANVAS_HEIGHT, BAR_WIDTH, -magnitude);
+    ctx.fillRect(i, CANVAS_HEIGHT, 1, -magnitude);
   }
 }
 </script>
