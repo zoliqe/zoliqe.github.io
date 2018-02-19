@@ -11,6 +11,29 @@ html, body {
   padding: 0;
   background-color: #afafaf;
 }
+body > section {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  /*-webkit-justify-content: center;*/
+  /*-webkit-align-content: center;*/
+  /*-webkit-align-items: center;*/
+  box-sizing: border-box;
+  height: 100%;
+  /*-webkit-perspective: 800;*/
+  /*-webkit-transform-style: preserve-3d;*/
+}
+section > * {
+  display: -webkit-flex;
+  /*-webkit-align-items: center;*/
+}
+select, button {
+  padding: 5px;
+  margin-top: 2px;
+  margin-left: 5px;
+}
+label {
+  margin-left: 10px;
+}
 #fft {
   border-color: gray;
   border-width: 2px;
@@ -27,107 +50,187 @@ html, body {
   color: #cfcfcf;
   /*z-index: 10;*/
 }
+#frequency {
+  font-size: 80px;
+  position: absolute;
+  z-index: 1;
+  right: 1em;
+  opacity: 0.5;
+  top: 0em;
+  text-shadow: -2px -2px 0px rgba(255, 255, 255, 0.9), 2px 2px 0px rgba(0, 0, 0, 0.7);
+  color: transparent;
+  font-weight: 400;
+}
 </style>
 </head>
 <body>
+<script src="tcvr.js"></script>
+<script defer src="smartceiver-webusb.js"></script>
 
 <div id="controls">
+  <label for="active">POWER</label>
   <button id="active">ON</button>
   <label for="bandwidth">BW</label>
-  <input id="bandwidth" value="600" type="range" min="100" max="2400" step="100"/>
-  <span id="bwValue"></span>
+  <select id="bandwidth">
+    <option value="300">300 Hz</option>
+    <option value="600">600 Hz</option>
+    <option value="1000">1 kHz</option>
+    <option value="2400">2.4 kHz</option>
+  </select>
+  <!--<span id="bwValue"></span>-->
   <!--<label for="Q">Q</label>-->
   <!--<input id="Q" value="2" type="range" min="0.5" max="5" step="0.5"/>-->
+  <label for="band">BAND</label>
+  <select id="band">
+    <option value="0">80m</option>
+    <option value="1">40m</option>
+    <option value="2">30m</option>
+    <option value="3">20m</option>
+    <option value="4">17m</option>
+    <option value="5">15m</option>
+    <option value="6">12m</option>
+    <option value="7">10m</option>
+  </select>
+  <label for="fast">FAST</label>
+  <input type="checkbox" id="fast"></input>
 </div>
 
 <section>
   <div>
     <canvas id="fft" class="fft" width="1024" height="260"></canvas>
   </div>
+  <h2 id="frequency"></h2>
 </section>
 <script>
-const canvas = document.getElementById('fft')
-const ctx = canvas.getContext('2d')
-canvas.width = document.body.clientWidth
-canvas.top = document.body.clientHeight - 50 - 260
-
 let active = false
 let audioCtx = null
 let analyser = null
 let audioStream = null
+let bandwidth = 600
+let fastTune = false
+const tcvr = new Transceiver()
 const filterArray = []
 const filterCount = 10
-// let bpf1 = null
-// let bpf2 = null
-
-const CANVAS_HEIGHT = canvas.height
-const CANVAS_WIDTH = canvas.width
+const hpfCutoff = 300
 const Q = 2
-// const centerFreq = 600
-// const cutoffFreq = 2400
 const cutoffDiv = 2
 
-// controls
-const activeBtn = document.getElementById('active')
-const bwSlider = document.getElementById('bandwidth')
-const bwValue = document.getElementById('bwValue')
-bwValue.innerHTML = bwSlider.value - 300
-// const qSlider = document.getElementById('Q')
+const canvas = document.querySelector('#fft')
+const ctx = canvas.getContext('2d')
+canvas.width = document.body.clientWidth
+// canvas.top = document.body.clientHeight - 50 - 260
+const CANVAS_HEIGHT = canvas.height
+const CANVAS_WIDTH = canvas.width
 
-activeBtn.addEventListener('click', (e) => {
+// controls
+const activeBtn = document.querySelector('#active')
+const bwSelect = document.querySelector('#bandwidth')
+document.querySelector('#bandwidth [value="' + bandwidth + '"]').selected = true
+// const bwValue = document.querySelector('#bwValue')
+// bwValue.innerHTML = bwSlider.value
+// const qSlider = document.getElementById('Q')
+const bandSelect = document.querySelector('#band')
+document.querySelector('#band [value="' + tcvr.band + '"]').selected = true
+const fastSelect = document.querySelector('#fast')
+const freqDisplay = document.querySelector('#frequency')
+freqChanged(tcvr.freq)
+
+activeBtn.addEventListener('click', e => {
   active = !active
-  activeBtn.innerHTML = active ? "OFF" : "ON"
+  activeBtn.textContent = active ? 'OFF' : 'ON'
+  tcvr.switchPower()
+  
   if (!active) {
     if (audioStream) {
-      audioStream.getTracks().forEach((track) => track.stop())
+      audioStream.getTracks().forEach(track => track.stop())
       audioStream = null
     }
     return
   }
   navigator.mediaDevices.getUserMedia({audio: true, video: false})
-    .then((stream) => {
+    .then(stream => {
       audioStream = stream
       audioCtx = new AudioContext()
       analyser = audioCtx.createAnalyser()
+      analyser.fftSize = 2048
       canvas.width = analyser.frequencyBinCount / cutoffDiv //document.body.clientWidth //1.4;
       audioCtx.createMediaStreamSource(audioStream).connect(analyser)
       buildFilterChain()
-    
-      rafCallback()
+      drawSpectrum()
     })
 })
 
-bwSlider.addEventListener('input', (e) => {
-  bwValue.innerHTML = bwSlider.value - 300
+// bwSlider.addEventListener('input', e => {
+//   bwValue.innerHTML = bwSlider.value
+//   updateFilter()
+// })
+bwSelect.addEventListener('change', e => {
+  bandwidth = parseInt(bwSelect.options[bwSelect.selectedIndex].value)
   updateFilter()
 })
 
+bandSelect.addEventListener('change', e => {
+  tcvr.band = bandSelect.options[bandSelect.selectedIndex].value
+})
+
+fastSelect.addEventListener('change', e => {
+  fastTune = fastSelect.checked
+})
+
+tcvr.addEventListener(EventType.freq, 'ui', event => freqChanged(event.value)) // listen for freq changes on mode/band change
+
+let touchstart = 0
+canvas.addEventListener('touchstart', e => {
+  touchStart = e.changedTouches.item(0).pageX
+})
+canvas.addEventListener('touchmove', e => tuneByTouch(e))
+canvas.addEventListener('touchend', e => tuneByTouch(e))
+
+function tuneByTouch(event) {
+  let position = event.changedTouches.item(0).pageX
+  event.preventDefault()
+  
+  let delta = position - touchStart
+  if (Math.abs(delta) > 5) {
+    if (delta > 0) {
+      tcvr.freq = tcvr.freq + (fastTune ? 200 : 20)
+    } else {
+      tcvr.freq = tcvr.freq - (fastTune ? 200 : 20)
+    }
+    touchStart = position
+  }
+}
+
+function freqChanged(freq) {
+  freqDisplay.textContent = formatFreq(freq)
+}
+
+function formatFreq(freq) {
+  this._freq = freq; // store value for change detect
+  let mhz = Math.floor(freq / 1000000);
+  let res = '' + mhz + '.';
+  let khz = (freq - mhz * 1000000) / 1000;
+  if (khz < 10) {
+   res += '0';
+  }
+  if (khz < 100) {
+   res += '0';
+  }
+ res += khz;
+  if (khz % 1 === 0) {
+   res += '.00';
+  } else if (freq % 100 === 0) {
+   res += '0';
+  }
+  return res;
+}
+
 function buildFilterChain() {
   console.log("building " + filterCount + " filters...")
-  // const lpf1 = audioCtx.createBiquadFilter()
-  // const lpf2 = audioCtx.createBiquadFilter()
-  // const lpf3 = audioCtx.createBiquadFilter()
-  // const lpf4 = audioCtx.createBiquadFilter()
   const hpf = audioCtx.createBiquadFilter()
-  // bpf1 = audioCtx.createBiquadFilter()
-  // bpf2 = audioCtx.createBiquadFilter()
-
-  // lpf1.type = 'lowpass'
-  // lpf1.frequency.setValueAtTime(cutoffFreq, 0)
-  // lpf1.Q.setValueAtTime(Q, 0)
-  // lpf2.type = 'lowpass'
-  // lpf2.frequency.setValueAtTime(cutoffFreq, 0)
-  // lpf2.Q.setValueAtTime(Q, 0)
-  // lpf3.type = 'lowpass'
-  // lpf3.frequency.setValueAtTime(cutoffFreq, 0)
-  // lpf3.Q.setValueAtTime(Q, 0)
-  // lpf4.type = 'lowpass'
-  // lpf4.frequency.setValueAtTime(cutoffFreq, 0)
-  // lpf4.Q.setValueAtTime(Q, 0)
   hpf.type = 'highpass'
-  hpf.frequency.setValueAtTime(300, 0)
-  // bpf1.type = 'bandpass'
-  // bpf2.type = 'bandpass'
+  hpf.frequency.setValueAtTime(hpfCutoff, 0)
+
   for (let i = 0; i < filterCount; i++) {
     const filter = audioCtx.createBiquadFilter()
     filterArray[i] = filter
@@ -139,49 +242,49 @@ function buildFilterChain() {
   updateFilter()
 
   analyser.connect(hpf)
-  // lpf1.connect(lpf2)
-  // lpf2.connect(lpf3)
-  // lpf3.connect(lpf4)
-  // lpf4.connect(hpf)
-  // hpf.connect(bpf1)
   hpf.connect(filterArray[0])
-  // bpf1.connect(bpf2)
-  // bpf2.connect(audioCtx.destination)
   filterArray[filterCount - 1].connect(audioCtx.destination)
   console.log("filters build done")
 }
 
 function updateFilter() {
-  const bandwidth = bwSlider.value
-  console.log("bandwidth=" + bandwidth)
+  const lpfCutoff = bandwidth + hpfCutoff // add hpf cutoff to bandwidth
+  console.log("bandwidth=" + bandwidth + ", lpfCutoff=" + lpfCutoff)
   for (let i = 0; i < filterCount; i++) {
     const filter = filterArray[i]
-    filter.frequency.setValueAtTime(bandwidth, 0)
+    filter.frequency.setValueAtTime(lpfCutoff, 0)
     filter.Q.setValueAtTime(Q/*centerFreq / bandwidth*/, 0)
   }
-  // bpf1.frequency.setValueAtTime(centerFreq, 0)
-  // bpf1.Q.setValueAtTime(centerFreq / bandwidth, 0)
-  // bpf2.frequency.setValueAtTime(centerFreq, 0)
-  // bpf2.Q.setValueAtTime(centerFreq / bandwidth, 0)
 }
 
-function rafCallback(time) {
-  window.requestAnimationFrame(rafCallback, canvas)
+function drawSpectrum(time) {
+  window.requestAnimationFrame(drawSpectrum, canvas)
 
   let freqByteData = new Uint8Array(analyser.frequencyBinCount)
   analyser.getByteFrequencyData(freqByteData) //analyser.getByteTimeDomainData(freqByteData);
+  const binFreq = binFrequency(1)
   // var numBars = Math.round(CANVAS_WIDTH / SPACER_WIDTH);
 
-  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  ctx.fillStyle = '#CA5E8C';
-  ctx.lineCap = 'round';
-  ctx.fillRect(10, CANVAS_HEIGHT, bwSlider.value / 30 + 10, -CANVAS_HEIGHT) // fc=9.5kHz, 2.4kHz wide
-  
-  ctx.fillStyle = '#5A7EDC';
+  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+  ctx.globalAlpha = 1.0
   for (let i = 0; i < analyser.frequencyBinCount / cutoffDiv; ++i) {
-    const magnitude = freqByteData[i];
-    ctx.fillRect(i, CANVAS_HEIGHT, 1, -magnitude);
+    if (i > 20 && (i * binFreq) % 1000 < 20) {
+      ctx.fillStyle = '#404040'
+      ctx.fillRect(i, CANVAS_HEIGHT, 1, -CANVAS_HEIGHT)
+    }
+    const magnitude = freqByteData[i]
+    ctx.fillStyle = 'rgb(50,' + magnitude + ',50)'
+    ctx.fillRect(i, CANVAS_HEIGHT, 1, -magnitude)
   }
+
+  ctx.globalAlpha = 0.5
+  ctx.fillStyle = '#615913'
+  ctx.lineCap = 'round'
+  ctx.fillRect(hpfCutoff / binFreq, CANVAS_HEIGHT, bandwidth / binFreq, -CANVAS_HEIGHT)
+}
+
+function binFrequency(n) {
+  return n * audioCtx.sampleRate / analyser.fftSize
 }
 </script>
 </body>
