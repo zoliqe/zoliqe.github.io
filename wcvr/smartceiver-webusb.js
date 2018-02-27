@@ -33,10 +33,10 @@ class SmartceiverWebUSBConnector {
   };
 
   _bindCommands(tcvr, port) {
-    tcvr.addEventListener(EventType.keyDit, this.constructor.id, event => port.send(".;"))
-    tcvr.addEventListener(EventType.keyDah, this.constructor.id, event => port.send("-;"))
+    tcvr.addEventListener(EventType.keyDit, this.id, event => port.send(".;"))
+    tcvr.addEventListener(EventType.keyDah, this.id, event => port.send("-;"))
     // tcvr.addEventListener(EventType.mode, this.constructor.id, event => port.send("MD" + (event.value + 1) + ";"))
-    tcvr.addEventListener(EventType.freq, this.constructor.id, event => {
+    tcvr.addEventListener(EventType.freq, this.id, event => {
       let freq = event.value
       let data = "FA" // + _vfos[this._rxVfo]; // TODO split
       data += "000"
@@ -46,14 +46,14 @@ class SmartceiverWebUSBConnector {
       data += freq
       port.send(data + ";")
     })
-    tcvr.addEventListener(EventType.wpm, this.constructor.id, event => port.send("KS0" + event.value + ";"))
-    tcvr.addEventListener(EventType.filter, this.constructor.id, event => {
+    tcvr.addEventListener(EventType.wpm, this.id, event => port.send("KS0" + event.value + ";"))
+    tcvr.addEventListener(EventType.filter, this.id, event => {
       // console.log('bandWidth=' + bandWidth)
       // TODO this.player.setFilter(tcvr.sidetoneFreq, event.value)
       port.send((event.value < 1000 ? "RW0" : "RW") + event.value + ";")
     })
-    tcvr.addEventListener(EventType.preamp, this.constructor.id, event => port.send("PA" + (event.value ? "1" : "0") + ";"))
-    tcvr.addEventListener(EventType.attn, this.constructor.id, event => port.send("RA0" + (event.value ? "1" : "0") + ";"))
+    tcvr.addEventListener(EventType.preamp, this.id, event => port.send("PA" + (event.value ? "1" : "0") + ";"))
+    tcvr.addEventListener(EventType.attn, this.id, event => port.send("RA0" + (event.value ? "1" : "0") + ";"))
   }
 }
 

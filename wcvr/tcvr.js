@@ -90,6 +90,9 @@ class Transceiver {
   }
   set wpm(wpm) {
     this.whenConnected(() => {
+      if (wpm < 12 || wpm > 40) {
+        return
+      }
       this._wpm = wpm
       this._d("wpm", wpm)
       this.dispatchEvent(new TcvrEvent(EventType.wpm, wpm))
