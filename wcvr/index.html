@@ -164,8 +164,8 @@ const canvas = document.querySelector('#fft')
 const ctx = canvas.getContext('2d')
 // canvas.width = document.body.clientWidth
 // canvas.top = document.body.clientHeight - 50 - 260
-const CANVAS_HEIGHT = canvas.height
-const CANVAS_WIDTH = canvas.width
+// const CANVAS_HEIGHT = canvas.height
+// const CANVAS_WIDTH = canvas.width
 
 // controls
 const activeBtn = document.querySelector('#active')
@@ -201,7 +201,8 @@ activeBtn.addEventListener('click', e => {
       audioStream = stream
       audioCtx = new AudioContext()
       analyser = audioCtx.createAnalyser()
-      analyser.fftSize = 2048
+      analyser.fftSize = 512
+      analyser.smoothingTimeConstant = 0.85
       canvas.width = analyser.frequencyBinCount / cutoffDiv //document.body.clientWidth //1.4;
       audioCtx.createMediaStreamSource(audioStream).connect(analyser)
       buildFilterChain()
@@ -323,22 +324,22 @@ function drawSpectrum(time) {
   const binFreq = binFrequency(1)
   // var numBars = Math.round(CANVAS_WIDTH / SPACER_WIDTH);
 
-  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.globalAlpha = 1.0
   for (let i = 0; i < analyser.frequencyBinCount / cutoffDiv; ++i) {
-    if (i > 20 && (i * binFreq) % 1000 < 20) {
+    if (i > 3 && (i * binFreq) % 1000 < 80) {
       ctx.fillStyle = '#404040'
-      ctx.fillRect(i, CANVAS_HEIGHT, 1, -CANVAS_HEIGHT)
+      ctx.fillRect(i, canvas.height, 1, -canvas.height)
     }
     const magnitude = freqByteData[i]
-    ctx.fillStyle = 'rgb(50,' + magnitude + ',50)'
-    ctx.fillRect(i, CANVAS_HEIGHT, 1, -magnitude)
+    ctx.fillStyle = 'rgb(50,' + magnitude + ',80)'
+    ctx.fillRect(i, canvas.height, 1, -magnitude)
   }
 
   ctx.globalAlpha = 0.5
   ctx.fillStyle = '#615913'
   ctx.lineCap = 'round'
-  ctx.fillRect(hpfCutoff / binFreq, CANVAS_HEIGHT, bandwidth / binFreq, -CANVAS_HEIGHT)
+  ctx.fillRect(hpfCutoff / binFreq, canvas.height, bandwidth / binFreq, -canvas.height)
 }
 
 function binFrequency(n) {
