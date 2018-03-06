@@ -187,12 +187,18 @@ freqChanged(tcvr.freq)
 activeBtn.addEventListener('click', e => {
   active = !active
   activeBtn.textContent = active ? 'OFF' : 'ON'
-  tcvr.switchPower()
+  tcvr.switchPower(active)
   
   if (!active) {
     if (audioStream) {
       audioStream.getTracks().forEach(track => track.stop())
       audioStream = null
+      analyser.disconnect()
+      analyser = null
+      filterArray.forEach(filter => filter.disconnect())
+      for (let i = 0; i < filterArray.length; i++) {
+        filterArray[i] = null
+      }
     }
     return
   }
@@ -291,7 +297,7 @@ function buildFilterChain() {
   hpf.frequency.setValueAtTime(hpfCutoff, 0)
 
   for (let i = 0; i < filterCount; i++) {
-    const filter = audioCtx.createBiquadFilter()
+    let filter = audioCtx.createBiquadFilter()
     filterArray[i] = filter
     filter.type = 'lowpass'
     if (i > 0) {
@@ -317,7 +323,11 @@ function updateFilter() {
 }
 
 function drawSpectrum(time) {
-  window.requestAnimationFrame(drawSpectrum, canvas)
+  if (active && analyser) {
+    window.requestAnimationFrame(drawSpectrum, canvas)
+  } else {
+    return
+  }
 
   let freqByteData = new Uint8Array(analyser.frequencyBinCount)
   analyser.getByteFrequencyData(freqByteData) //analyser.getByteTimeDomainData(freqByteData);

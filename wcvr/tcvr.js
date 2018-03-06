@@ -24,13 +24,13 @@ class Transceiver {
     this._d("tcvr-init", "done");
   }
 
-  switchPower() {
-    if (this._port) {
+  switchPower(state) {
+    if ( ! state && this._port) {
       this._d("disconnect", true)
-      this.removeEventListenersFor(this._port.constructor.id)
+      this.removeEventListenersFor(SmartceiverWebUSBConnector.id)
       this._port.disconnect()
-      this._port = undefined
-    } else {
+      this._port = null
+    } else if (state) {
       console.log('connect')
       let connectorId = SmartceiverWebUSBConnector.id
       let connector = tcvrConnectors.get(connectorId)
