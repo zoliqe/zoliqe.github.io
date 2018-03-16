@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-<title>Webceiver</title>
+<title>Smartceiver</title>
 <style>
 html, body {
   overflow: hidden;
@@ -67,40 +67,28 @@ label {
 </head>
 <body>
 <script src="tcvr.js"></script>
-<script defer src="smartceiver-webusb.js"></script>
+<script src="smartceiver-webusb.js"></script>
 
 <div id="controls">
   <!--<label for="active">POWER</label>-->
   <button id="active">ON</button>
-  <!--<label for="bandwidth">BW</label>-->
-  <select id="bandwidth">
-    <option value="300">300 Hz</option>
-    <option value="600">600 Hz</option>
-    <option value="1000">1 kHz</option>
-    <option value="2400">2.4 kHz</option>
-  </select>
   <!--<span id="bwValue"></span>-->
   <!--<label for="Q">Q</label>-->
   <!--<input id="Q" value="2" type="range" min="0.5" max="5" step="0.5"/>-->
   <!--<label for="band">BAND</label>-->
-  <select id="band">
-    <option value="0">80m</option>
-    <option value="1">40m</option>
-    <option value="2">30m</option>
-    <option value="3">20m</option>
-    <option value="4">17m</option>
-    <option value="5">15m</option>
-    <option value="6">12m</option>
-    <option value="7">10m</option>
-  </select>
+  <select id="band"></select>
   <label for="fast">FAST</label>
-  <input type="checkbox" id="fast"></input>
+  <input type="checkbox" id="fast" />
+  <label for="attn">ATTN</label>
+  <input type="checkbox" id="attn" />
+  <!--<label for="bandwidth">BW</label>-->
+  <select id="bandwidth"></select>
   <label for="decwpm">WPM</label>
   <button id="decwpm">-</button>
   <label for="incwpm" id="wpm"></label>
   <button id="incwpm">+</button>
   <label for="send">SEND</label>
-  <input id="send" type="text" size="20"></input>
+  <input id="send" type="text" size="20" />
   <button id="stop">X</button>
   <select id="sendmem">
     <option value="">MEM</option>
@@ -152,13 +140,14 @@ let active = false
 let audioCtx = null
 let analyser = null
 let audioStream = null
-let bandwidth = 600
+// let bandwidth = 600
 let fastTune = false
 const tcvr = new Transceiver()
 const filterArray = []
 const filterCount = 10
 const hpfCutoff = 300
 const Q = 2
+const wpmStep = 2
 const cutoffDiv = 2
 
 const canvas = document.querySelector('#fft')
@@ -171,14 +160,28 @@ canvas.height = 256
 
 // controls
 const activeBtn = document.querySelector('#active')
-const bwSelect = document.querySelector('#bandwidth')
-document.querySelector('#bandwidth [value="' + bandwidth + '"]').selected = true
-// const bwValue = document.querySelector('#bwValue')
-// bwValue.innerHTML = bwSlider.value
-// const qSlider = document.getElementById('Q')
+const filterSelect = document.querySelector('#bandwidth')
+for (let i = 0; i < tcvr.filters.length; i++) {
+  let option = document.createElement('option')
+  option.text = formatFilter(tcvr.filters[i])
+  option.value = i
+  filterSelect.add(option)
+}
+filterSelect.selectedIndex = tcvr.filter
+// document.querySelector('#bandwidth [value="' + tcvr.filter + '"]').selected = true
 const bandSelect = document.querySelector('#band')
-document.querySelector('#band [value="' + tcvr.band + '"]').selected = true
+for (let i = 0; i < tcvr.bands.length; i++) {
+  let option = document.createElement('option')
+  option.text = formatBand(tcvr.bands[i])
+  option.value = i
+  bandSelect.add(option)
+}
+bandSelect.selectedIndex = tcvr.band
+// document.querySelector('#band [value="' + tcvr.band + '"]').selected = true
 const fastSelect = document.querySelector('#fast')
+fastSelect.checked = fastTune
+const attnSelect = document.querySelector('#attn')
+attnSelect.checked = tcvr.attn
 const wpmDisplay = document.querySelector('#wpm')
 wpmDisplay.textContent = tcvr.wpm
 const wpmDecBtn = document.querySelector('#decwpm')
@@ -187,11 +190,11 @@ const freqDisplay = document.querySelector('#frequency')
 freqChanged(tcvr.freq)
 
 activeBtn.addEventListener('click', e => {
-  active = !active
+  tcvr.switchPower( ! active)
+  active = ! active
   activeBtn.textContent = active ? 'OFF' : 'ON'
-  tcvr.switchPower(active)
   
-  if (!active) {
+  if ( ! active) {
     if (audioStream) {
       audioStream.getTracks().forEach(track => track.stop())
       audioStream = null
@@ -204,6 +207,7 @@ activeBtn.addEventListener('click', e => {
     }
     return
   }
+
   navigator.mediaDevices.getUserMedia({audio: true, video: false})
     .then(stream => {
       audioStream = stream
@@ -218,33 +222,36 @@ activeBtn.addEventListener('click', e => {
     })
 })
 
-// bwSlider.addEventListener('input', e => {
-//   bwValue.innerHTML = bwSlider.value
-//   updateFilter()
-// })
-bwSelect.addEventListener('change', e => {
-  bandwidth = parseInt(bwSelect.options[bwSelect.selectedIndex].value)
-  updateFilter()
+filterSelect.addEventListener('change', e => {
+  // bandwidth = parseInt(filterSelect.options[filterSelect.selectedIndex].value)
+  tcvr.filter = filterSelect.selectedIndex
 })
 
 bandSelect.addEventListener('change', e => {
-  tcvr.band = bandSelect.options[bandSelect.selectedIndex].value
+  // tcvr.band = bandSelect.options[bandSelect.selectedIndex].value
+  tcvr.band = bandSelect.selectedIndex
 })
 
 fastSelect.addEventListener('change', e => {
   fastTune = fastSelect.checked
 })
 
-wpmDecBtn.addEventListener('click', e => {
-  tcvr.wpm = tcvr.wpm - 2
-  wpmDisplay.textContent = tcvr.wpm
-})
-wpmIncBtn.addEventListener('click', e => {
-  tcvr.wpm = tcvr.wpm + 2
-  wpmDisplay.textContent = tcvr.wpm
+attnSelect.addEventListener('change', e => {
+  tcvr.attn = attnSelect.checked
 })
 
-tcvr.addEventListener(EventType.freq, 'ui', event => freqChanged(event.value)) // listen for freq changes on mode/band change
+wpmDecBtn.addEventListener('click', e => {
+  tcvr.wpm = tcvr.wpm - wpmStep
+  // wpmDisplay.textContent = tcvr.wpm
+})
+wpmIncBtn.addEventListener('click', e => {
+  tcvr.wpm = tcvr.wpm + wpmStep
+  // wpmDisplay.textContent = tcvr.wpm
+})
+
+tcvr.bind(EventType.freq, 'ui', event => freqChanged(event.value)) // listen for freq changes on mode/band change
+tcvr.bind(EventType.filter, 'ui', event => updateFilter(event.value)) // filter change
+tcvr.bind(EventType.wpm, 'ui', event => wpmDisplay.textContent = event.value)
 
 let touchstart = 0
 let touchMoved = false
@@ -279,6 +286,7 @@ function tuneByTouch(event) {
 
 function freqChanged(freq) {
   freqDisplay.textContent = formatFreq(freq)
+  // TODO add band change detect
 }
 
 function formatFreq(freq) {
@@ -301,6 +309,14 @@ function formatFreq(freq) {
   return res;
 }
 
+function formatFilter(bandwidth) {
+  return bandwidth < 1000 ? bandwidth + "Hz" : bandwidth / 1000.0 + "kHz"
+}
+
+function formatBand(freq) {
+  return Math.round(freq / 100000) / 10.0 + "MHz"
+}
+
 function buildFilterChain() {
   console.log("building " + filterCount + " filters...")
   const hpf = audioCtx.createBiquadFilter()
@@ -315,7 +331,7 @@ function buildFilterChain() {
       filterArray[i - 1].connect(filter)
     }
   }
-  updateFilter()
+  updateFilter({bandwidth: tcvr.bandwidth, filter: tcvr.filter})
 
   analyser.connect(hpf)
   hpf.connect(filterArray[0])
@@ -323,9 +339,13 @@ function buildFilterChain() {
   console.log("filters build done")
 }
 
-function updateFilter() {
-  const lpfCutoff = bandwidth + hpfCutoff // add hpf cutoff to bandwidth
-  console.log("bandwidth=" + bandwidth + ", lpfCutoff=" + lpfCutoff)
+function updateFilter(tcvrFilter) {
+  if (filterSelect.selectedIndex != tcvrFilter.filter) {
+    filterSelect.selectedIndex = tcvrFilter.filter
+    // TODO stop propagate default event
+  }
+  const lpfCutoff = tcvrFilter.bandwidth + hpfCutoff // add hpf cutoff to bandwidth
+  console.log("bandwidth=" + tcvrFilter.bandwidth + ", lpfCutoff=" + lpfCutoff)
   for (let i = 0; i < filterCount; i++) {
     const filter = filterArray[i]
     filter.frequency.setValueAtTime(lpfCutoff, 0)
@@ -360,7 +380,7 @@ function drawSpectrum(time) {
   ctx.globalAlpha = 0.5
   ctx.fillStyle = '#615913'
   ctx.lineCap = 'round'
-  ctx.fillRect(hpfCutoff / binFreq, canvas.height, bandwidth / binFreq, -canvas.height)
+  ctx.fillRect(hpfCutoff / binFreq, canvas.height, tcvr.bandwidth / binFreq, -canvas.height)
 }
 
 function binFrequency(n) {
