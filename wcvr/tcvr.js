@@ -343,7 +343,9 @@ class EventListener {
   get callback() { return this._callback }
 }
 
-const EventType = Object.freeze({freq: 1, wpm: 2, mode: 3, vfo: 4, filter: 5, preamp: 6, attn: 7, keyDit: 8, keyDah: 9, ptt: 10})
+const EventType = Object.freeze({
+  freq: 1, wpm: 2, mode: 3, vfo: 4, filter: 5, preamp: 6, attn: 7, keyDit: 8, keyDah: 9, ptt: 10, tune: 11,
+})
 
 class ConnectorRegister {
   constructor() { this._reg = {} }

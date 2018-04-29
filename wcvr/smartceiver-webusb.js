@@ -62,6 +62,7 @@ class SmartceiverWebUSBConnector {
     })
     tcvr.bind(EventType.preamp, this.constructor.id, event => port.send("PA" + (event.value ? "1" : "0") + ";"))
     tcvr.bind(EventType.attn, this.constructor.id, event => port.send("RA" + (event.value ? "1" : "0") + ";"))
+    tcvr.bind(EventType.tune, this.constructor.id, event => port.send("TT" + (event.value ? "1" : "0") + ";"))
   }
 }
 

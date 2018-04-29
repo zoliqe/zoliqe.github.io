@@ -78,9 +78,11 @@ label {
   <!--<label for="band">BAND</label>-->
   <select id="band"></select>
   <label for="fast">FAST</label>
-  <input type="checkbox" id="fast" />
+  <input type="checkbox" id="fast">
   <label for="attn">ATTN</label>
-  <input type="checkbox" id="attn" />
+  <input type="checkbox" id="attn">
+  <label for="tune">TUNE</label>
+  <input type="checkbox" id="tune">
   <!--<label for="bandwidth">BW</label>-->
   <select id="bandwidth"></select>
   <label for="decwpm">WPM</label>
@@ -88,7 +90,7 @@ label {
   <label for="incwpm" id="wpm"></label>
   <button id="incwpm">+</button>
   <label for="send">SEND</label>
-  <input id="send" type="text" size="20" />
+  <input id="send" type="text" size="20">
   <button id="stop">X</button>
   <select id="sendmem">
     <option value="">MEM</option>
@@ -111,19 +113,19 @@ label {
     <option value="8">8</option>
     <option value="9">9</option>
     <option value="10">10</option>
-    <option value="12">12</option>
-    <option value="14">14</option>
-    <option value="16">16</option>
-    <option value="18">18</option>
-    <option value="20">20</option>
+    <!--<option value="12">12</option>-->
+    <!--<option value="14">14</option>-->
+    <!--<option value="16">16</option>-->
+    <!--<option value="18">18</option>-->
+    <!--<option value="20">20</option>-->
     <option value="30">30</option>
-    <option value="40">40</option>
-    <option value="50">50</option>
+    <!--<option value="40">40</option>-->
+    <!--<option value="50">50</option>-->
     <option value="60">60</option>
-    <option value="90">90</option>
+    <!--<option value="90">90</option>-->
     <option value="120">120</option>
-    <option value="180">180</option>
-    <option value="240">240</option>
+    <!--<option value="180">180</option>-->
+    <!--<option value="240">240</option>-->
     <option value="300">300</option>
     <option value="600">600</option>
   </select>
@@ -183,6 +185,7 @@ const fastSelect = document.querySelector('#fast')
 fastSelect.checked = fastTune
 const attnSelect = document.querySelector('#attn')
 attnSelect.checked = tcvr.attn
+const tuneSelect = document.querySelector('#tune')
 const wpmDisplay = document.querySelector('#wpm')
 wpmDisplay.textContent = tcvr.wpm
 const wpmDecBtn = document.querySelector('#decwpm')
@@ -241,6 +244,10 @@ fastSelect.addEventListener('change', e => {
 
 attnSelect.addEventListener('change', e => {
   tcvr.attn = attnSelect.checked
+})
+
+tuneSelect.addEventListener('change', e => {
+  tcvr.fire(new TcvrEvent(EventType.tune, tuneSelect.checked))
 })
 
 wpmDecBtn.addEventListener('click', e => {
