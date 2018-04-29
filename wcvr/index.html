@@ -139,6 +139,7 @@ label {
 let active = false
 let audioCtx = null
 let analyser = null
+let gain = null
 let audioStream = null
 // let bandwidth = 600
 let fastTune = false
@@ -212,11 +213,13 @@ activeBtn.addEventListener('click', e => {
     .then(stream => {
       audioStream = stream
       audioCtx = new AudioContext()
+      gain = audioCtx.createGain()
       analyser = audioCtx.createAnalyser()
       analyser.fftSize = 512
       analyser.smoothingTimeConstant = 0.85
       canvas.width = analyser.frequencyBinCount / cutoffDiv //document.body.clientWidth //1.4;
-      audioCtx.createMediaStreamSource(audioStream).connect(analyser)
+      audioCtx.createMediaStreamSource(audioStream).connect(gain)
+      gain.connect(analyser)
       buildFilterChain()
       drawSpectrum()
     })
@@ -252,6 +255,7 @@ wpmIncBtn.addEventListener('click', e => {
 tcvr.bind(EventType.freq, 'ui', event => freqChanged(event.value)) // listen for freq changes on mode/band change
 tcvr.bind(EventType.filter, 'ui', event => updateFilter(event.value)) // filter change
 tcvr.bind(EventType.wpm, 'ui', event => wpmDisplay.textContent = event.value)
+tcvr.bind(EventType.ptt, 'ui', event => gain.gain.setValueAtTime(event.value ? 0 : 1, audioCtx.currentTime))
 
 let touchstart = 0
 let touchMoved = false

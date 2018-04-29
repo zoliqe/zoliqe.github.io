@@ -33,6 +33,14 @@ class SmartceiverWebUSBConnector {
   };
 
   _bindCommands(tcvr, port) {
+    port.onReceive = data => {
+      if (data.includes('TP1;')) {
+        tcvr.fire(new TcvrEvent(EventType.ptt, true));
+      } else if (data.includes('TP0;')) {
+        tcvr.fire(new TcvrEvent(EventType.ptt, false));
+      }
+    }
+    
     tcvr.bind(EventType.keyDit, this.constructor.id, event => port.send(".;"))
     tcvr.bind(EventType.keyDah, this.constructor.id, event => port.send("-;"))
     // tcvr.bind(EventType.mode, this.constructor.id, event => port.send("MD" + (event.value + 1) + ";"))
@@ -53,7 +61,7 @@ class SmartceiverWebUSBConnector {
       port.send((event.value.bandwidth < 1000 ? "RW0" : "RW") + event.value.bandwidth + ";")
     })
     tcvr.bind(EventType.preamp, this.constructor.id, event => port.send("PA" + (event.value ? "1" : "0") + ";"))
-    tcvr.bind(EventType.attn, this.constructor.id, event => port.send("RA0" + (event.value ? "1" : "0") + ";"))
+    tcvr.bind(EventType.attn, this.constructor.id, event => port.send("RA" + (event.value ? "1" : "0") + ";"))
   }
 }
 
@@ -61,6 +69,7 @@ class SmartceiverWebUSBPort {
   constructor(device) {
     this._device = device;
     this._encoder = new TextEncoder();
+    this._buffer = ''
   }
 
   _open() {
@@ -75,7 +84,7 @@ class SmartceiverWebUSBPort {
     };
     return this._device.open()
       .then(() => {
-        if (this._device.configuration === null) {
+        if (this._device.configuration == null) {
           return this._device.selectConfiguration(1);
         }
       })
