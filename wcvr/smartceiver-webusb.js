@@ -34,6 +34,7 @@ class SmartceiverWebUSBConnector {
 
   _bindCommands(tcvr, port) {
     port.onReceive = data => {
+      console.log('rcvd: ' + data)
       if (data.includes('TP1;')) {
         tcvr.fire(new TcvrEvent(EventType.ptt, true));
       } else if (data.includes('TP0;')) {
