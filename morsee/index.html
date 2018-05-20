@@ -260,9 +260,9 @@ wpmIncBtn.addEventListener('click', e => {
 })
 
 tcvr.bind(EventType.freq, 'ui', event => freqChanged(event.value)) // listen for freq changes on mode/band change
-tcvr.bind(EventType.filter, 'ui', event => updateFilter(event.value)) // filter change
+// tcvr.bind(EventType.filter, 'ui', event => updateFilter(event.value)) // filter change
 tcvr.bind(EventType.wpm, 'ui', event => wpmDisplay.textContent = event.value)
-tcvr.bind(EventType.ptt, 'ui', event => gain.gain.setValueAtTime(event.value ? 0 : 1, audioCtx.currentTime))
+// tcvr.bind(EventType.ptt, 'ui', event => gain.gain.setValueAtTime(event.value ? 0 : 1, audioCtx.currentTime))
 
 let touchstart = 0
 let touchMoved = false
