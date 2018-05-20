@@ -316,7 +316,7 @@ class Transceiver {
 
   fire(event) {
     let stack = this._listeners[event.type];
-    stack.forEach(listenner => listenner.callback.call(this, event));
+    stack && stack.forEach(listenner => listenner.callback.call(this, event));
     return true;//!event.defaultPrevented;
   }
 
