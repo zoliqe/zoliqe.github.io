@@ -1,6 +1,32 @@
 <html>
   <head>
     <title>AD9850-AA</title>
+    <style>
+#graph {
+  border-color: gray;
+  border-width: 2px;
+  border-style: solid;
+  top: 3em;
+  position: absolute;
+  padding: 2px;
+  width: 98%;
+  height: 500px;
+  background-color: white;
+  color: blue;
+}
+#reverse {
+  font-size: 80px;
+  position: absolute;
+  z-index: 1;
+  right: 1em;
+  opacity: 0.5;
+  top: 1em;
+  text-shadow: -2px -2px 0px rgba(255, 255, 255, 0.9), 2px 2px 0px rgba(0, 0, 0, 0.7);
+  color: transparent;
+  font-weight: 400;
+  user-select: none;
+}
+    </style>
   </head>
 
   <body>
@@ -10,7 +36,8 @@
 
     <div id="log"> </div>
 
-    <canvas id="chart" width="600" height="200"></canvas>
+    <canvas id="graph" class="graph"></canvas>
+    <span id="reverse" class="reverse"></span>
   </body>
 
   <script src="chart.bundle.min.js"></script>
