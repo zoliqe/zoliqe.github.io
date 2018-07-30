@@ -63,12 +63,17 @@ button {
   display: flex;
   vertical-align: center;
 }
+.controls .knob-place {
+  flex-grow: 3;
+  /*width: 70%;*/
+  padding-left: 28%;
+}
 .controls .knob {
   position: relative;
   background-color: lightgray;/*#09f*/
   background: radial-gradient(circle, darkgray, black);
   /*margin: 20px auto;*/
-  margin-left: 26%;
+  /*margin-left: 26%;*/
   width: 14em;
   height: 14em;
   border-radius: 7em;
@@ -87,7 +92,7 @@ button {
   margin-top: 7em;
 }
 .controls #mhzUp {
-  margin-left: 32%;
+  /*margin-left: 32%;*/
 }
 .controls :last-child {
   margin-right: 0;
@@ -111,8 +116,10 @@ button {
     <div class="controls">
       <button id="bandDn">&lt;&lt; Band</button>
       <button id="mhzDn">1 MHz --</button>
-      <div id="knob" class="knob">
-        <span id="dimp" class="dimp"></span>
+      <div class="knob-place">
+        <div id="knob" class="knob">
+          <span id="dimp" class="dimp"></span>
+        </div>
       </div>
       <button id="mhzUp">1 MHz ++</button>
       <button id="bandUp">Band &gt;&gt;</button>
