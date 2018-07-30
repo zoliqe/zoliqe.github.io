@@ -4,7 +4,20 @@
     <style>
 button {
   height: 36px;
+  margin-right: 20px;
 }
+
+.panel {
+  display: flex;
+}
+.panel #log {
+  width: 90%;
+  padding-top: 0.5em;
+}
+.panel #link {
+  padding-top: 0.5em;
+}
+
 .graph-place {
   height: 430px;
 }
@@ -46,35 +59,48 @@ button {
   user-select: none;
 }
 
-.knob {
+.controls {
+  display: flex;
+  vertical-align: center;
+}
+.controls .knob {
   position: relative;
   background-color: lightgray;/*#09f*/
   background: radial-gradient(circle, darkgray, black);
   /*margin: 20px auto;*/
-  margin-left: 45%;
-  width: 200px;
-  height: 200px;
-  border-radius: 100px;
+  margin-left: 26%;
+  width: 14em;
+  height: 14em;
+  border-radius: 7em;
 }
-.dimp {
+.controls .dimp {
   position: absolute;
   background-color: gray;
   background: radial-gradient(circle, #3d3d3d, #1e1e1e);
-  margin: 15px auto;
-  left: 50%;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  margin: 1em auto;
+  left: 45%;
+  width: 3em;
+  height: 3em;
+  border-radius: 1.5em;
+}
+.controls button {
+  margin-top: 7em;
+}
+.controls #mhzUp {
+  margin-left: 32%;
+}
+.controls :last-child {
+  margin-right: 0;
 }
     </style>
   </head>
 
   <body>
-    <button type="button" id="connectButton">Connect!</button>
-    <!--<button type="button" id="freqButton">Set freq</button>-->
-    <!--<input type="number" id="freq" value="7050" min="3000" max="30000" step="10" />-->
-
-    <span id="log">Loading</span>
+    <div class="panel">
+      <button type="button" id="connectButton">Connect!</button>
+      <span id="log">Loading</span>
+      <span id="link"><a href="multi.html">FullScan</a></span>
+    </div>
 
     <div class="graph-place">
       <canvas id="graph" class="graph"></canvas>
@@ -82,14 +108,20 @@ button {
       <span id="reverse" class="reverse"></span>
     </div>
 
-    <div>
+    <div class="controls">
+      <button id="bandDn">&lt;&lt; Band</button>
+      <button id="mhzDn">1 MHz --</button>
       <div id="knob" class="knob">
         <span id="dimp" class="dimp"></span>
       </div>
+      <button id="mhzUp">1 MHz ++</button>
+      <button id="bandUp">Band &gt;&gt;</button>
     </div>
   </body>
 
   <!--<script src="chart.bundle.min.js"></script>-->
+  <script src="microbit.js"></script>
+  <script src="knob.js"></script>
   <script src="main.js"></script>
 
 </html>
