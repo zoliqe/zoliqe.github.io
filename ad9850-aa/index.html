@@ -2,7 +2,13 @@
   <head>
     <title>AD9850-AA</title>
     <style>
-#graph {
+button {
+  height: 36px;
+}
+.graph-place {
+  height: 430px;
+}
+.graph {
   border-color: gray;
   border-width: 2px;
   border-style: solid;
@@ -10,11 +16,12 @@
   position: absolute;
   padding: 2px;
   width: 98%;
-  height: 500px;
-  background-color: white;
-  color: blue;
+  height: 410px;
+  background-color: lightgray;
+/*  color: blue;*/
 }
-#reverse {
+
+.reverse {
   font-size: 80px;
   position: absolute;
   z-index: 1;
@@ -26,18 +33,60 @@
   font-weight: 400;
   user-select: none;
 }
+.freq {
+  font-size: 80px;
+  position: absolute;
+  z-index: 1;
+  left: 1em;
+  opacity: 0.5;
+  top: 1em;
+  text-shadow: -2px -2px 0px rgba(255, 255, 255, 0.9), 2px 2px 0px rgba(0, 0, 0, 0.7);
+  color: transparent;
+  font-weight: 400;
+  user-select: none;
+}
+
+.knob {
+  position: relative;
+  background-color: lightgray;/*#09f*/
+  background: radial-gradient(circle, darkgray, black);
+  /*margin: 20px auto;*/
+  margin-left: 45%;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+}
+.dimp {
+  position: absolute;
+  background-color: gray;
+  background: radial-gradient(circle, #3d3d3d, #1e1e1e);
+  margin: 15px auto;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
     </style>
   </head>
 
   <body>
     <button type="button" id="connectButton">Connect!</button>
     <!--<button type="button" id="freqButton">Set freq</button>-->
-    <input type="number" id="freq" value="7050" min="3000" max="30000" step="10" />
+    <!--<input type="number" id="freq" value="7050" min="3000" max="30000" step="10" />-->
 
-    <div id="log"> </div>
+    <span id="log">Loading</span>
 
-    <canvas id="graph" class="graph"></canvas>
-    <span id="reverse" class="reverse"></span>
+    <div class="graph-place">
+      <canvas id="graph" class="graph"></canvas>
+      <span id="freq" class="freq"></span>
+      <span id="reverse" class="reverse"></span>
+    </div>
+
+    <div>
+      <div id="knob" class="knob">
+        <span id="dimp" class="dimp"></span>
+      </div>
+    </div>
   </body>
 
   <!--<script src="chart.bundle.min.js"></script>-->
