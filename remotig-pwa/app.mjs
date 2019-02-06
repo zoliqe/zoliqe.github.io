@@ -207,7 +207,7 @@ export function stop() {
 export function start() {
 	if (isChannelReady || isStarted) return;
 	connectSocket()
-	powron.connect()
+	//powron.connect()
 
 	window.onbeforeunload = _ => {
 		console.info('Hanging up.')
