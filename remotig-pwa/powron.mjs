@@ -30,7 +30,7 @@ class Powron {
 		this._keyerPin = options.keyerPin
 		this._pttPin = options.pttPin
 		this._serialBaudRate = options.serialBaudRate
-		this.connect()
+		//this.connect()
 	}
 
   async connect() {
