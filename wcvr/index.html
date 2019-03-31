@@ -229,7 +229,7 @@ activeBtn.addEventListener('click', e => {
       gain = audioCtx.createGain()
       analyser = audioCtx.createAnalyser()
       analyser.fftSize = 512
-      analyser.smoothingTimeConstant = 0.99
+      analyser.smoothingTimeConstant = 0.8
       canvas.width = analyser.frequencyBinCount / cutoffDiv //document.body.clientWidth //1.4;
       audioCtx.createMediaStreamSource(audioStream).connect(gain)
       gain.connect(analyser)
