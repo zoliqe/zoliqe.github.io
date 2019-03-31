@@ -147,7 +147,7 @@ let audioStream = null
 let fastTune = false
 const tcvr = new Transceiver()
 const filterArray = []
-const filterCount = 10
+const filterCount = 4
 const hpfCutoff = 300
 const Q = 2
 const wpmStep = 2
@@ -229,7 +229,7 @@ activeBtn.addEventListener('click', e => {
       gain = audioCtx.createGain()
       analyser = audioCtx.createAnalyser()
       analyser.fftSize = 512
-      analyser.smoothingTimeConstant = 0.85
+      analyser.smoothingTimeConstant = 0.95
       canvas.width = analyser.frequencyBinCount / cutoffDiv //document.body.clientWidth //1.4;
       audioCtx.createMediaStreamSource(audioStream).connect(gain)
       gain.connect(analyser)
