@@ -274,17 +274,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       async _fetchStatus() {
         if (!this.kredence.rig) return
-
-        const response = await fetch(`https://${this.kredence.qth}/remotig/${this.kredence.rig}/status`)
-        let online = false
-        if (response.ok) {
-          const status = await response.json()
-          online = status && status.id
+        this.operator = 'OFF'
+        this.notifyPath('operator')
+        RemotigRTCConnector.checkState(this.kredence, status => {
+          let online = status && status.id
           console.debug('rtt:', status.rtt)
           if (online) this.operator = status.op || 'ON'
-        }
-        if (!online) this.operator = 'OFF'
-        this.notifyPath('operator')
+          this.notifyPath('operator')
+        })
+
+        // const response = await fetch(`/remotig/${this.kredence.rig}/status`)
+        // let online = false
+        // if (response.ok) {
+        //   const status = await response.json()
+        //   online = status && status.id
+        //   console.debug('rtt:', status.rtt)
+        //   if (online) this.operator = status.op || 'ON'
+        // }
+        // if (!online) this.operator = 'OFF'
+        // this.notifyPath('operator')
       }
 
       _freqChanged(freq) {
