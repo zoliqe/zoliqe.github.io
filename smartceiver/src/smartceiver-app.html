@@ -277,7 +277,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!this.kredence.rig) return
         if (!RemotigRTCConnector) return // FIXME 
         
-        if (this.unackStateQueries > 5) this.operator = 'OFF'
+        if (this.unackStateQueries > 2) this.operator = 'OFF'
         this.notifyPath('operator')
         this.unackStateQueries++
         RemotigRTCConnector.checkState(this.kredence, status => {
