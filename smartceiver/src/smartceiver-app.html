@@ -275,7 +275,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       async _fetchStatus() {
         if (!this.kredence.rig) return
-        if (window.RemotigRTCConnector === undefined) return // FIXME 
+        if (typeof RemotigRTCConnector === 'undefined') return // FIXME 
         
         if (this.unackStateQueries > 2) this.operator = 'OFF'
         this.notifyPath('operator')
