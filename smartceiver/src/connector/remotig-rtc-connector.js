@@ -97,9 +97,10 @@ class RemotigRTCConnector {
 			this.disconnect()
 		})
 
-		this._signaling.on('joined', async (rig) => {
-			console.info('Operating ' + rig)
+		this._signaling.on('joined', async (data) => {
+			console.info(`Operating ${data.rig} as ${data.op}`)
 			this._isReady = true
+			this.iceServers = data.iceServers
 			// this._mic = await new Microphone(this.tcvr).request()
 			this.sendSignal('ready')
 		})
@@ -112,7 +113,7 @@ class RemotigRTCConnector {
 		this._signaling.on('message', (message) => {
 			console.info('signal message:', message)
 			if (message === 'ready') {
-				this._maybeStart()
+				// this._maybeStart()
 			} else if (message.type === 'offer') {
 				!this._isStarted && this._maybeStart()
 				this._pc.setRemoteDescription(new RTCSessionDescription(message))
@@ -177,7 +178,7 @@ class RemotigRTCConnector {
 
 	_createPeerConnection() {
 		try {
-			const config = {'iceServers': this.options.iceServers}
+			const config = {'iceServers': this.iceServers}
 			this._pc = new RTCPeerConnection(config)
 			this._pc.onicecandidate = event => this._handleIceCandidate(event)
 			this._pc.ontrack = event => this._audio = new AudioProcessor(event, this.tcvr)

@@ -19,11 +19,11 @@ const connectorConfig = {
 		reconnectionDelay: 10000,
 		reconnectionDelayMax: 60000,
 	},
-	iceServers: [
-		{urls: 'stun:stun.l.google.com:19302'},
-		// {urls: 'turns:om4aa.ddns.net:25349', username: 'remotig', credential: 'om4aa'},
-		{urls: 'turns:rozkvet.radioklub.sk:25349', username: 'remotig', credential: 'om4aa'},
-	],
+	// iceServers: [
+	// 	{urls: 'stun:stun.l.google.com:19302'},
+	// 	// {urls: 'turns:om4aa.ddns.net:25349', username: 'remotig', credential: 'om4aa'},
+	// 	{urls: 'turns:rozkvet.radioklub.sk:25349', username: 'remotig', credential: 'om4aa'},
+	// ],
 }
 
 class Transceiver {
