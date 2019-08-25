@@ -290,4 +290,4 @@ class RemotigRTCConnector {
 
 }
 
-tcvrConnectors.register(new RemotigRTCConnector())
+connectors.register(new RemotigRTCConnector())

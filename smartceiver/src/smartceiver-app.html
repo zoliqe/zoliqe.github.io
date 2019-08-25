@@ -365,7 +365,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (params.rig) {
           this.kredence.rig = params.rig.trim()
           if (this.kredence.rig.includes('@')) {
-            this.connectorId = 'RTC'
+            this.connectorId = 'RTC';
             [this.kredence.rig, this.kredence.qth] = this.kredence.rig.split('@', 2)
           } else if (this.kredence.rig == 'usb' || this.kredence.rig == 'bt') {
             this.connectorId = this.kredence.rig.toUpperCase()
