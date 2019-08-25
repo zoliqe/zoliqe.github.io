@@ -1,5 +1,5 @@
 
-class SmartceiverWebUSBConnector {
+class WebUSBConnector {
   constructor() {
     this.devFilters = [
       { 'vendorId': 0x2341, 'productId': 0x8036 },
@@ -7,8 +7,8 @@ class SmartceiverWebUSBConnector {
     ]
   }
 
-  static get id() { return 'smartceiver-webusb'; }
-  static get name() { return 'SmartCeiver standalone WebUSB'; }
+  static get id() { return 'USB'; }
+  static get name() { return 'SmartCeiver standalone USB'; }
   static get capabilities() { return []; }
 
   connect(tcvr, successCallback) {

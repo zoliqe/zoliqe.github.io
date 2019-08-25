@@ -1,1 +1,1 @@
-const selectedConnector = 'remotig-rtc'
+const selectedConnector = 'RTC'

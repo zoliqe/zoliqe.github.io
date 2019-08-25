@@ -1,6 +1,6 @@
 class RemotigRTCConnector {
-	static get id() { return 'remotig-rtc'; }
-	static get name() { return 'Remotig remote via WebRTC'; }
+	static get id() { return 'RTC'; }
+	static get name() { return 'Remotig via WebRTC'; }
 	static get capabilities() { return [Remoddle.id]; }
 
 	constructor() {

@@ -199,26 +199,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script src="select-connector.js"></script>
   <script src="tcvr.js"></script>
   <script defer src="controls.js"></script>
-  <script defer src="serial.js"></script>
-  <script defer src="remoddle-usb.js"></script>
-  <script defer src="BluetoothTerminal.js"></script>
-  <script defer src="remoddle-bt.js"></script>
+  <script defer src="utils/serial.js"></script>
+  <script defer src="utils/BluetoothTerminal.js"></script>
+  <script defer src="remoddle/remoddle-usb.js"></script>
+  <script defer src="remoddle/remoddle-bt.js"></script>
   <!-- <script defer src="https://simplewebrtc.com/latest-v2.js"></script> -->
   <!-- <script defer src="k2-webrtc.js"></script> -->
   <!-- <script defer src="wav-player.js"></script> -->
-  <script defer src="smartceiver-webusb.js"></script>
+  <script defer src="connector/usb-connector.js"></script>
   <!-- <script defer src="3las/audio_player.js"></script> -->
   <!-- <script defer src="3las/socket_client.js"></script> -->
   <!-- <script defer src="3las/format_reader.js"></script> -->
   <!-- <script defer src="3las/mpeg.js"></script> -->
   <!-- <script defer src="3las/wav.js"></script> -->
   <!-- <script defer src="3las-player.js"></script> -->
-  <script defer src="https://om4aa.ddns.net/socket.io/socket.io.js"></script>
-  <script defer src="rtc-player.js"></script>
-  <script defer src="audio.js"></script>
-  <script defer src="mic.js"></script>
+  <script defer src="util/socket.io.js"></script>
+  <!-- <script defer src="rtc-player.js"></script> -->
+  <script defer src="utils/audio.js"></script>
+  <script defer src="utils/mic.js"></script>
   <!-- <script defer src="remotig-ws.js"></script> -->
-  <script defer src="remotig-rtc.js"></script>
+  <script defer src="connector/remotig-rtc-connector.js"></script>
 
   <script>
     class SmartceiverApp extends Polymer.Element {
@@ -269,17 +269,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.tcvr.bind(EventType.step, 'ui', event => this.notifyPath('tcvr.step'))
 
         this.operator = ':::'
+        this.unackStateQueries = 0
         setInterval(_ => this._fetchStatus(), 5000)
       }
 
       async _fetchStatus() {
         if (!this.kredence.rig) return
-        this.operator = 'OFF'
+        
+        if (this.unackStateQueries > 5) this.operator = 'OFF'
         this.notifyPath('operator')
+        this.unackStateQueries++
         RemotigRTCConnector.checkState(this.kredence, status => {
           let online = status && status.id
           console.debug('rtt:', status.rtt)
-          if (online) this.operator = status.op || 'ON'
+          if (online) {
+            this.operator = status.op || 'ON'
+            this.unackStateQueries = 0
+          }
           this.notifyPath('operator')
         })
 
