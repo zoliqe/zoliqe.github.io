@@ -1,5 +1,5 @@
 const _bands = ['1.8', '3.5', '7', /* '10.1', */ '14', /* '18', */ '21', /* '24', */ '28']
-const _bandLowEdges = [1810, 3500, 7000, 10100, 14000, 18068, 21000, 24890, 28000]
+const _bandLowEdges = [1810, 3500, 7000, /* 10100, */ 14000, /* 18068, */ 21000, /* 24890, */ 28000]
 const _startFreqFromLowEdge = 21
 const _modes = ['LSB', 'USB', 'CW', /*'CWR'*/] // order copies mode code for MDn cmd
 const _filters = {
@@ -77,7 +77,7 @@ class Transceiver {
 			this._port = null
 			this.fire(new TcvrEvent(EventType.pwrsw, this.powerSwState), true)
 		} else if (connector) {
-			this._d('connect connector:', connector.id)
+			this._d('connect connector', connector.id)
 			this._reversePaddle = reversePaddle
 			this.connectRemoddle(connector, remoddle)
 			connector.connect(this, kredence, connectorConfig, (port) => {
