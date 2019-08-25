@@ -8,6 +8,10 @@ class RemotigRTCConnector {
 		this._isStarted = false;
 	}
 
+	get id() {
+		return this.constructor.id
+	}
+
  	connect(tcvr, kredence, options, successCallback, discCallback) {
 		if (this._isReady || this._isStarted) return;
 
@@ -68,7 +72,7 @@ class RemotigRTCConnector {
 		this.sendCommand('filter=' + bandWidth)
 	}
 
-	static checkState(kredence, callback) {
+	checkState(kredence, callback) {
 		if (!kredence.qth || !kredence.rig || !callback) return;
 		const signaling = io.connect('wss://' + kredence.qth, {transports: ['websocket']})
 		signaling.on('state', state => {

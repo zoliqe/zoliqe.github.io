@@ -198,6 +198,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script src="select-connector.js"></script>
   <script src="tcvr.js"></script>
+  <script src="connector/connectors.js"></script>
   <script defer src="controls.js"></script>
   <script defer src="util/serial.js"></script>
   <script defer src="util/BluetoothTerminal.js"></script>
@@ -249,6 +250,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       constructor() {
         super()
         this.page = 'tune'
+        this.connectorId
         this.kredence = {}
         this.remoddle
         this.reverse = false
@@ -275,12 +277,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       async _fetchStatus() {
         if (!this.kredence.rig) return
-        if (typeof RemotigRTCConnector === 'undefined') return // FIXME 
+        const connector = connectors.get(this.connectorId)
+        if (connector == null) return
         
-        if (this.unackStateQueries > 2) this.operator = 'OFF'
         this.notifyPath('operator')
         this.unackStateQueries++
-        RemotigRTCConnector.checkState(this.kredence, status => {
+        connector.checkState(this.kredence, status => {
           let online = status && status.id
           console.debug('rtt:', status.rtt)
           if (online) {
@@ -289,6 +291,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           this.notifyPath('operator')
         })
+        if (this.unackStateQueries > 2) this.operator = 'OFF'
 
         // const response = await fetch(`/remotig/${this.kredence.rig}/status`)
         // let online = false
@@ -340,7 +343,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       switchPower() {
-        this.tcvr.switchPower(this.kredence, this.remoddle, this.reverse)
+        this.tcvr.switchPower(connectors.get(this.connectorId), this.kredence, this.remoddle, this.reverse)
       }
 
       connectRemoddle() {
@@ -362,9 +365,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (params.rig) {
           this.kredence.rig = params.rig.trim()
           if (this.kredence.rig.includes('@')) {
+            this.connectorId = 'RTC'
             [this.kredence.rig, this.kredence.qth] = this.kredence.rig.split('@', 2)
+          } else if (this.kredence.rig == 'usb' || this.kredence.rig == 'bt') {
+            this.connectorId = this.kredence.rig.toUpperCase()
           }
-          // this.kredence.url = 'wss://om4aa.ddns.net' // TODO parsovat z rig (bude zadavane do inputu)
           this._fetchStatus()
         }
         if (params.remoddle) {

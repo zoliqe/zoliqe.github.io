@@ -11,7 +11,11 @@ class WebUSBConnector {
   static get name() { return 'SmartCeiver standalone USB'; }
   static get capabilities() { return []; }
 
-  connect(tcvr, successCallback) {
+  get id() {
+    return this.constructor.id
+  }
+
+  connect(tcvr, kredence, options, successCallback, discCallback) {
     // this.requestPort()
     navigator.usb.requestDevice({ 'filters': this.devFilters }).then(device => {
       console.log('Connecting to ' + device.productName)
@@ -25,6 +29,20 @@ class WebUSBConnector {
     }).catch(error => {
       console.error('Connection error (1): ' + error);
     });
+  }
+
+  disconnect(options) {
+  }
+
+  get connected() {
+    return true
+  }
+
+  filter(bandWidth, centerFreq) {
+  }
+
+  checkState(kredence, callback) {
+    callback({id: this.id}) // emulate online state
   }
 
   _connectDevice(device) {

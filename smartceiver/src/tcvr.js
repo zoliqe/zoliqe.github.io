@@ -1,4 +1,4 @@
-const _bands = ['1.8', '3.5', '7', '10.1', '14', '18', '21', '24', '28']
+const _bands = ['1.8', '3.5', '7', /* '10.1', */ '14', /* '18', */ '21', /* '24', */ '28']
 const _bandLowEdges = [1810, 3500, 7000, 10100, 14000, 18068, 21000, 24890, 28000]
 const _startFreqFromLowEdge = 21
 const _modes = ['LSB', 'USB', 'CW', /*'CWR'*/] // order copies mode code for MDn cmd
@@ -19,11 +19,6 @@ const connectorConfig = {
 		reconnectionDelay: 10000,
 		reconnectionDelayMax: 60000,
 	},
-	// iceServers: [
-	// 	{urls: 'stun:stun.l.google.com:19302'},
-	// 	// {urls: 'turns:om4aa.ddns.net:25349', username: 'remotig', credential: 'om4aa'},
-	// 	{urls: 'turns:rozkvet.radioklub.sk:25349', username: 'remotig', credential: 'om4aa'},
-	// ],
 }
 
 class Transceiver {
@@ -61,9 +56,8 @@ class Transceiver {
 		// this._autoSpace = true
 		// this._buildBFO();
 
-		this._connectorId = selectedConnector || SmartceiverWebUSBConnector.id
+		// this._connectorId = connectorId //selectedConnector || SmartceiverWebUSBConnector.id
 		// this._connectorId = typeof selectedConnector === 'undefined' ? SmartceiverWebUSBConnector.id : selectedConnector
-		console.log('used connector: ' + this._connectorId)
 		
 		this._listeners = {}
 		// this.bind(EventType.keyDit, 'tcvr', event => this._tone(1))
@@ -73,22 +67,19 @@ class Transceiver {
 		this._d("tcvr-init", "done")
 	}
 
-	switchPower(kredence, remoddle, reversePaddle) {
-		if ( /*! state &&*/ this._port) {
+	switchPower(connector, kredence, remoddle, reversePaddle) {
+		if (this._port) {
 			this._d('disconnect', this._port && this._port.constructor.id)
 			this._controls = null
 			this.disconnectRemoddle()
 			this._port.disconnect()
-			this.unbind(this._connectorId)
+			this.unbind(connector.id)
 			this._port = null
 			this.fire(new TcvrEvent(EventType.pwrsw, this.powerSwState), true)
-		} else /*if (state)*/ {
-			this._d('connect', this._connectorId)
+		} else if (connector) {
+			this._d('connect connector:', connector.id)
 			this._reversePaddle = reversePaddle
-			let connector = tcvrConnectors.get(this._connectorId)
 			this.connectRemoddle(connector, remoddle)
-			// connectorConfig.token = token
-			// connectorConfig.rig = rig
 			connector.connect(this, kredence, connectorConfig, (port) => {
 				this._port = port
 				// reset tcvr configuration
@@ -481,14 +472,3 @@ const EventType = Object.freeze({
 	ptt: 'ptt', agc: 'agc', pwrsw: 'pwrsw', step: 'step', resetAudio: 'resetAudio',
 	audioMute: 'audioMute',
 })
-
-class ConnectorRegister {
-	constructor() { this._reg = {} }
-
-	register(connector) { this._reg[connector.constructor.id] = connector }
-	get(id) { return this._reg[id] }
-
-	get all() { return Object.values(this._reg) }
-}
-
-var tcvrConnectors = new ConnectorRegister();
