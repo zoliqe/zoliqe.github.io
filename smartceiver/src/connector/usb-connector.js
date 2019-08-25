@@ -116,4 +116,4 @@ class SmartceiverWebUSBPort {
   }
 }
 
-tcvrConnectors.register(new SmartceiverWebUSBConnector());
+tcvrConnectors.register(new WebUSBConnector());
