@@ -1,3 +1,4 @@
+
 class RemotigRTCConnector {
 	static get id() { return 'RTC'; }
 	static get name() { return 'Remotig via WebRTC'; }
@@ -290,4 +291,5 @@ class RemotigRTCConnector {
 
 }
 
-connectors.register(new RemotigRTCConnector())
+// connectors.register(new RemotigRTCConnector())
+export { RemotigRTCConnector }

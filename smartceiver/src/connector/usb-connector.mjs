@@ -134,4 +134,5 @@ class SmartceiverWebUSBPort {
   }
 }
 
-connectors.register(new WebUSBConnector());
+// connectors.register(new WebUSBConnector());
+export { WebUSBConnector }
