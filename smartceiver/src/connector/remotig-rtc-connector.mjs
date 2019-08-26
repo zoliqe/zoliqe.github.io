@@ -73,14 +73,17 @@ class RemotigRTCConnector {
 		this.sendCommand('filter=' + bandWidth)
 	}
 
-	checkState(kredence, callback) {
+	checkState(kredence) {
 		if (!kredence.qth || !kredence.rig || !callback) return;
 		const signaling = io.connect('wss://' + kredence.qth, {transports: ['websocket']})
-		signaling.on('state', state => {
-			signaling.disconnect()
-			callback(state)
+		const statePromise = new Promise((resolve) => {
+			signaling.on('state', state => {
+				signaling.disconnect()
+				resolve(state)
+			})
 		})
 		signaling.emit('state', kredence.rig)
+		return statePromise
 	}
 
 	////////////////////////////////////////////////////

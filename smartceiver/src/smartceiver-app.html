@@ -276,33 +276,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       async _fetchStatus() {
-        if (!this.kredence.rig) return
-        // const connector = connectors.get(this.connectorId)
-        if (this.connector == null) return
+        if (!this.kredence.rig || !this.connector) return
         
-        this.notifyPath('operator')
         this.unackStateQueries++
-        this.connector.checkState(this.kredence, status => {
-          let online = status && status.id
+        const status = await this.connector.checkState(this.kredence)
+        if (status && status.id) {
           console.debug('rtt:', status.rtt)
-          if (online) {
-            this.operator = status.op || 'ON'
-            this.unackStateQueries = 0
-          }
-          this.notifyPath('operator')
-        })
+          this.operator = status.op || 'ON'
+          this.unackStateQueries = 0
+        }
+        this.notifyPath('operator')
         if (this.unackStateQueries > 2) this.operator = 'OFF'
-
-        // const response = await fetch(`/remotig/${this.kredence.rig}/status`)
-        // let online = false
-        // if (response.ok) {
-        //   const status = await response.json()
-        //   online = status && status.id
-        //   console.debug('rtt:', status.rtt)
-        //   if (online) this.operator = status.op || 'ON'
-        // }
-        // if (!online) this.operator = 'OFF'
-        // this.notifyPath('operator')
+        return status
       }
 
       _freqChanged(freq) {
@@ -362,6 +347,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (params.token) {
           this.kredence.token = params.token.trim()
         }
+        this.autoPower = params.autopwr && (params.autopwr.trim() === '1')
         if (params.rig) {
           this.kredence.rig = params.rig.trim()
           let connectorId
@@ -375,7 +361,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           const connectors = await import('./connector/connectors.mjs')
           this.connector = await connectors.get(connectorId)
           this.$.pwrbtn.disabled = this.connector == null
-          this._fetchStatus()
+          const state = await this._fetchStatus()
+          if (this.autoPower && state && state.id && !state.op) {
+            this.switchPower()
+          }
         }
         if (params.remoddle) {
           this.remoddle = params.remoddle.trim()

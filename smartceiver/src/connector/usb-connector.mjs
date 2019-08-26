@@ -41,8 +41,8 @@ class WebUSBConnector {
   filter(bandWidth, centerFreq) {
   }
 
-  checkState(kredence, callback) {
-    callback({id: this.id}) // emulate online state
+  checkState(kredence) {
+    return new Promise((resolve) => resolve({id: this.id})) // emulate online state
   }
 
   _connectDevice(device) {
