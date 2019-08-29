@@ -1,3 +1,6 @@
+import {EventType} from '../util/events.mjs'
+import {AudioProcessor} from '../util/audio.mjs'
+// import {Microphone} from '../util/mic.mjs'
 
 class RemotigRTCConnector {
 	static get id() { return 'RTC'; }
@@ -13,15 +16,16 @@ class RemotigRTCConnector {
 		return this.constructor.id
 	}
 
- 	connect(tcvr, kredence, options, successCallback, discCallback) {
-		if (this._isReady || this._isStarted) return;
+ 	async connect(tcvr, kredence, options) {
+		if (this._isReady || this._isStarted) return null
 
 		this.tcvr = tcvr
 		this.kredence = kredence || {}
 		this.options = options || {}
-		this.onconnect = successCallback
-		this.ondisconnect = discCallback
+		this._connectPromise = new Promise()
+		// this.ondisconnect = discCallback
 		this._connectSignaling()
+		return this._connectPromise
 	}
 
 	reconnect() {
@@ -58,6 +62,7 @@ class RemotigRTCConnector {
 		}
 		this._signaling && this._signaling.disconnect()
 		this._signaling = null
+		this._connectPromise = null
 
 		if (options.alertUser) {
 			window.alert('Transceiver control disconnected!')
@@ -251,7 +256,7 @@ class RemotigRTCConnector {
 		setTimeout(() => {
 			this._startPowerOnTimer(this.options.session.heartbeat)
 			this._bindCommands()
-			this.onconnect && this.onconnect(this)
+			this._connectPromise && this._connectPromise.resolve(this)
 		}, this.options.session.connectDelay) // delay for tcvr-init after poweron 
 	}
 

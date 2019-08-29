@@ -1,3 +1,4 @@
+import {EventType} from '../util/events.mjs'
 
 class WebUSBConnector {
   constructor() {
@@ -15,20 +16,19 @@ class WebUSBConnector {
     return this.constructor.id
   }
 
-  connect(tcvr, kredence, options, successCallback, discCallback) {
+  connect(tcvr, kredence, options) {
     // this.requestPort()
+    const connectPromise = new Promise()
     navigator.usb.requestDevice({ 'filters': this.devFilters }).then(device => {
       console.log('Connecting to ' + device.productName)
       this._connectDevice(device).then(port => {
         console.log('Connected ' + device.productName)
         this._bindCommands(tcvr, port)
-        successCallback(port);
-      }, error => {
-         console.log('Connection error (2): ' + error);
-      });
-    }).catch(error => {
-      console.error('Connection error (1): ' + error);
-    });
+        connectPromise.resolve(port)
+      }, error => console.log('Connection error (2): ' + error))
+    })
+    .catch(error => console.error('Connection error (1): ' + error))
+    return connectPromise
   }
 
   disconnect(options) {
@@ -134,5 +134,4 @@ class SmartceiverWebUSBPort {
   }
 }
 
-// connectors.register(new WebUSBConnector());
 export { WebUSBConnector }
