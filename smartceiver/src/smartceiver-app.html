@@ -316,7 +316,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			formatFreq(freq) {
 				this._freq = freq // store value for change detect
-				if (freq === null || !this.tcvr.powerSwState) {
+				if (freq === null || !this.tcvr || !this.tcvr.powerSwState) {
 					return this.operator
 				}
 
@@ -343,13 +343,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.tcvr.switchPower(this.connector, this.kredence, this.remoddle, this.reverse)
 			}
 
-			connectRemoddle() {
-				this.tcvr.connectRemoddle()
-			}
+			// connectRemoddle() {
+			// 	this.tcvr.connectRemoddle()
+			// }
 
-			restartAudio() {
-				this.tcvr.fire(new TcvrEvent(EventType.resetAudio, true))
-			}
+			// restartAudio() {
+			// 	this.tcvr.fire(new TcvrEvent(EventType.resetAudio, true))
+			// }
 
 			mute() {
 				this.tcvr.fire(new TcvrEvent(EventType.audioMute, true))
