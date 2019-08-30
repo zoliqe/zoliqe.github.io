@@ -22,10 +22,8 @@ class RemotigRTCConnector {
 		this.tcvr = tcvr
 		this.kredence = kredence || {}
 		this.options = options || {}
-		this._connectPromise = new Promise()
-		// this.ondisconnect = discCallback
 		this._connectSignaling()
-		return this._connectPromise
+		return new Promise(resolve => this.onconnect = resolve)
 	}
 
 	reconnect() {
@@ -62,7 +60,7 @@ class RemotigRTCConnector {
 		}
 		this._signaling && this._signaling.disconnect()
 		this._signaling = null
-		this._connectPromise = null
+		this.onconnect = null
 
 		if (options.alertUser) {
 			window.alert('Transceiver control disconnected!')
@@ -256,7 +254,7 @@ class RemotigRTCConnector {
 		setTimeout(() => {
 			this._startPowerOnTimer(this.options.session.heartbeat)
 			this._bindCommands()
-			this._connectPromise && this._connectPromise.resolve(this)
+			this.onconnect && this.onconnect(this)
 		}, this.options.session.connectDelay) // delay for tcvr-init after poweron 
 	}
 

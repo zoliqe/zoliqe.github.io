@@ -18,17 +18,19 @@ class WebUSBConnector {
 
   connect(tcvr, kredence, options) {
     // this.requestPort()
-    const connectPromise = new Promise()
-    navigator.usb.requestDevice({ 'filters': this.devFilters }).then(device => {
+    return new Promise(async (resolve) => {
+      const device = await navigator.usb.requestDevice({ 'filters': this.devFilters })
+      // .then(device => {
       console.log('Connecting to ' + device.productName)
-      this._connectDevice(device).then(port => {
-        console.log('Connected ' + device.productName)
-        this._bindCommands(tcvr, port)
-        connectPromise.resolve(port)
-      }, error => console.log('Connection error (2): ' + error))
+      const port = await this._connectDevice(device)
+      // .then(port => {
+      console.log('Connected ' + device.productName)
+      this._bindCommands(tcvr, port)
+      resolve(port)
+      // }, error => console.log('Connection error (2): ' + error))
+      // })
+      //   .catch(error => console.error('Connection error (1): ' + error))
     })
-    .catch(error => console.error('Connection error (1): ' + error))
-    return connectPromise
   }
 
   disconnect(options) {
