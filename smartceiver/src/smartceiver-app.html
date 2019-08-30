@@ -222,7 +222,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <!-- <script defer src="connector/remotig-rtc-connector.js"></script> -->
 
   <script type="module">
-    import {Transceiver, EventType, TcvrEvent} from './tcvr.js'
+    import {Transceiver, EventType, TcvrEvent} from './tcvr.mjs'
 
     class SmartceiverApp extends Polymer.Element {
 
@@ -364,9 +364,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.connector = await connectors.get(connectorId)
           this.$.pwrbtn.disabled = this.connector == null
           const state = await this._fetchStatus()
-          if (this.autoPower && state && state.id && !state.op) {
-            this.switchPower()
-          }
+          // this not working due autoplay policy
+          // if (this.autoPower && state && state.id && !state.op) {
+          //   this.switchPower()
+          // }
         }
         if (params.remoddle) {
           this.remoddle = params.remoddle.trim()
