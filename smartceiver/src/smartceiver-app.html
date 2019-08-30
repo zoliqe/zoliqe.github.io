@@ -222,7 +222,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <!-- <script defer src="connector/remotig-rtc-connector.js"></script> -->
 
   <script type="module">
-    import {Transceiver, EventType, TcvrEvent} from './tcvr.mjs'
+    import {Transceiver} from './tcvr.mjs'
+    import {EventType, TcvrEvent} from './util/events.mjs'
 
     class SmartceiverApp extends Polymer.Element {
 
