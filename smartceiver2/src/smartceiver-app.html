@@ -288,17 +288,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</app-header>
 
 				<ul class="app-grid">
-					<li><div class="card knob-card" hidden="[[!powerState]]">
+					<li><div class="card knob-card">
 						<input-knob value="[[freq]]" scale="[[step * 50]]" min="[[band.freqFrom]]" max="[[band.freqTo]]">
 							<div class="mark">▲</div>
 						</input-knob>
 						<div class="controls">
-							<paper-item>
+							<paper-item hidden="[[!powerState]]">
 								<paper-button toggles raised on-tap="switchMode" class="toggles toggle-btn" hidden="[[!powerState]]">
 									MODE<br />[[mode]]
 								</paper-button>
 							</paper-item>
-							<paper-item>
+							<paper-item hidden="[[!powerState]]">
 								<paper-button toggles raised on-tap="switchGain" class="toggles toggle-btn" hidden="[[!powerState]]">
 									GAIN<br />[[gain]]
 								</paper-button>
@@ -306,12 +306,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</div>
 					</div></li>
 					<li><div class="card" role="listbox" hidden="[[!powerState]]">
-						<paper-item class="ctl">
+						<paper-item class="ctl" hidden="[[!powerState]]">
 							<paper-button raised on-tap="decreaseWpm" class="ctl" hidden="[[!powerState]]">--</paper-button>
 							<span class="ctl-value">[[wpm]] <span class="ctl-name">WPM</span></span>
 							<paper-button raised on-tap="increaseWpm" class="ctl" hidden="[[!powerState]]">++</paper-button>
 						</paper-item>
-						<paper-item class="ctl">
+						<paper-item class="ctl" hidden="[[!powerState]]">
 							<paper-button raised on-tap="decFilter" hidden="[[!powerState]]" class="ctl">--</paper-button>
 							<span class="ctl-value">[[filter]]<br/><span class="ctl-name">Hz</span></span>
 							<paper-button raised on-tap="incFilter" hidden="[[!powerState]]" class="ctl">++</paper-button>
