@@ -288,7 +288,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</app-header>
 
 				<ul class="app-grid">
-					<li><div class="card knob-card">
+					<li><div class="card knob-card" hidden="[[!powerState]]">
 						<input-knob value="[[freq]]" scale="[[step * 50]]" min="[[band.freqFrom]]" max="[[band.freqTo]]">
 							<div class="mark">▲</div>
 						</input-knob>
@@ -305,7 +305,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							</paper-item>
 						</div>
 					</div></li>
-					<li><div class="card" role="listbox">
+					<li><div class="card" role="listbox" hidden="[[!powerState]]">
 						<paper-item class="ctl">
 							<paper-button raised on-tap="decreaseWpm" class="ctl" hidden="[[!powerState]]">--</paper-button>
 							<span class="ctl-value">[[wpm]] <span class="ctl-name">WPM</span></span>
