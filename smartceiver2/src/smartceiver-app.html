@@ -294,12 +294,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</input-knob>
 						<div class="controls">
 							<paper-item>
-								<paper-button toggles raised on-tap="switchMode" class="toggles toggle-btn" disabled="[[!powerState]]">
+								<paper-button toggles raised on-tap="switchMode" class="toggles toggle-btn" hidden="[[!powerState]]">
 									MODE<br />[[mode]]
 								</paper-button>
 							</paper-item>
 							<paper-item>
-								<paper-button toggles raised on-tap="switchGain" class="toggles toggle-btn" disabled="[[!powerState]]">
+								<paper-button toggles raised on-tap="switchGain" class="toggles toggle-btn" hidden="[[!powerState]]">
 									GAIN<br />[[gain]]
 								</paper-button>
 							</paper-item>
@@ -307,14 +307,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					</div></li>
 					<li><div class="card" role="listbox">
 						<paper-item class="ctl">
-							<paper-button raised on-tap="decreaseWpm" class="ctl" disabled="[[!powerState]]">--</paper-button>
+							<paper-button raised on-tap="decreaseWpm" class="ctl" hidden="[[!powerState]]">--</paper-button>
 							<span class="ctl-value">[[wpm]] <span class="ctl-name">WPM</span></span>
-							<paper-button raised on-tap="increaseWpm" class="ctl" disabled="[[!powerState]]">++</paper-button>
+							<paper-button raised on-tap="increaseWpm" class="ctl" hidden="[[!powerState]]">++</paper-button>
 						</paper-item>
 						<paper-item class="ctl">
-							<paper-button raised on-tap="decFilter" disabled="[[!powerState]]" class="ctl">--</paper-button>
+							<paper-button raised on-tap="decFilter" hidden="[[!powerState]]" class="ctl">--</paper-button>
 							<span class="ctl-value">[[filter]]<br/><span class="ctl-name">Hz</span></span>
-							<paper-button raised on-tap="incFilter" disabled="[[!powerState]]" class="ctl">++</paper-button>
+							<paper-button raised on-tap="incFilter" hidden="[[!powerState]]" class="ctl">++</paper-button>
 						</paper-item>
 					</div></li>
 					</ul>
