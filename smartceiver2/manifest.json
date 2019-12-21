@@ -5,7 +5,7 @@
   "background_color": "#444444",
   "display": "fullscreen",
   "orientation": "landscape",
-  "Scope": "/",
+  "Scope": "/smartceiver2/",
   "start_url": "/?serial=yeasu-ft817",
   "icons": [
     {
