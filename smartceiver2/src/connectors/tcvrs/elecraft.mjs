@@ -1,4 +1,4 @@
-import { Bands, Modes, AgcTypes } from '../../tcvr.mjs'
+import { Bands, Modes, AgcTypes } from '../../tcvr.js'
 import { delay } from '../../utils/time.mjs'
 import { selectFilter, resolveAgc, tcvrOptions } from './utils.mjs'
 
@@ -46,10 +46,10 @@ export class Adapter {
 	async init(dataSender) {
 		this._uart = async (data) => await dataSender(data + ';')
 		await delay(2000) // wait for tcvr internal CPU start
-		this._uart('FR0') // set VFO A as RX VFO + cancel SPLIT
+		await this._uart('FR0') // set VFO A as RX VFO + cancel SPLIT
 	}
 
-	close() {
+	async close() {
 		this._uart = _ => { } // do nothing
 	}
 

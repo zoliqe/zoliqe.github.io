@@ -1,4 +1,4 @@
-import {Bands, Modes, AgcTypes} from '../../tcvr.mjs'
+import {Bands, Modes, AgcTypes} from '../../tcvr.js'
 import {delay} from '../../utils/time.mjs'
 import { resolveAgc, tcvrOptions } from './utils.mjs'
 
@@ -43,11 +43,11 @@ export class Adapter {
 	}
 
 	async init(dataSender) {
-		this._uart = dataSender
+		this._uart = async (data) => await dataSender(new Uint8Array(data))
 		await delay(2000) // wait for tcvr internal CPU start
 	}
 
-	close() {
+	async close() {
 		this._uart = _ => {} // do nothing
 	}
 
