@@ -462,7 +462,7 @@ export class SmartceiverApp extends LitElement {
 
 	async switchPower() {
 		this.pwrbtnDisable = true
-		await this.tcvr.switchPower(this.connectors, this.kredence, this.remoddle)
+		await this.tcvr.switchPower(this.connectors, this.remoddle)
 	}
 
 	decreaseWpm() {
@@ -474,32 +474,22 @@ export class SmartceiverApp extends LitElement {
 	}
 
 	switchMode() {
-		// const i = this.tcvr.modes.indexOf(this.mode)
-		// this.tcvr.mode = this.tcvr.modes[i < (this.tcvr.modes.length - 1) ? i + 1 : 0]
 		this.tcvr.mode = nextValue(this.tcvr.modes, this.mode)
 	}
 
 	switchGain() {
-		// const i = this.tcvr.gains.indexOf(this.gain)
-		// this.tcvr.gain = this.tcvr.gains[i < (this.tcvr.bands.length - 1) ? i + 1 : 0]
 		this.tcvr.gain = nextValue(this.tcvr.gains, this.gain)
 	}
 			
 	switchBand() {
-		// const i = this.tcvr.bands.indexOf(this.band)
-		// this.tcvr.band = this.tcvr.bands[i < (this.tcvr.bands.length - 1) ? i + 1 : 0]
 		this.tcvr.band = nextValue(this.tcvr.bands, this.band)
 	}
 
 	switchStep() {
-		// const i = this.tcvr.steps.indexOf(this.knob.scale / 400)
-		// this.tcvr.step = this.tcvr.steps[i < (this.tcvr.steps.length - 1) ? i + 1 : 0]
 		this.tcvr.step = nextValue(this.tcvr.steps, this.knob.scale / 400)
 	}
 
 	switchFilter() {
-		// const i = this.tcvr.filters.indexOf(this.filter)
-		// this.tcvr.filter = this.tcvr.filters[i < (this.tcvr.filters.length - 1) ? i + 1 : 0]
 		this.tcvr.filter = nextValue(this.tcvr.filters, this.filter)
 	}
 

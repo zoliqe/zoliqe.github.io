@@ -35,6 +35,18 @@ export class TcvrController {
 		await this.#tcvr && this.#tcvr.switchPower(connector, remoddleOptions)
 	}
 
+	keyDit() {
+		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.keyDit, 1))
+	}
+
+	keyDah() {
+		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.keyDah, 1))
+	}
+
+	keySpace() {
+		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.keySpace, 1))
+	}
+
 	set ptt(value) {
 		this.#tcvr && this.#tcvr.setPtt(this, value)
 	}
@@ -156,18 +168,6 @@ export class TcvrController {
 
 	set agc(value) {
 		this.#tcvr && this.#tcvr.setAgc(this, value)
-	}
-
-	keyDit() {
-		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.keyDit, 1))
-	}
-
-	keyDah() {
-		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.keyDah, 1))
-	}
-
-	keySpace() {
-		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.keySpace, 1))
 	}
 
 }
