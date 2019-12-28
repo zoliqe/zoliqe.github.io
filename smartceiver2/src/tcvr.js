@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-return-assign */
 /* eslint-disable max-classes-per-file */
@@ -329,7 +330,7 @@ class Transceiver {
 	}
 
 	get online() {
-		return this.properties && this.properties.some(port => port.connected)
+		return this.properties && this.#ports.some(port => port.connected)
 	}
 
 	get bands() {
