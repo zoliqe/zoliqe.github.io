@@ -5,8 +5,8 @@
   <title>Smartceiver</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
   <meta name="Description" content="Smartceiver controlling app for hamradio transceivers.">
-  <link rel="manifest" href="./manifest.json">
-  <base href="/smartceiver2/">
+  <link rel="manifest" href="manifest.json">
+  <base href="/">
 
   <style>
     html, body {
@@ -20,6 +20,8 @@
 </head>
 <body>
   <smartceiver-app></smartceiver-app>
+  
+  <audio id="remoteAudio" autoplay></audio>
 
 	<script src="https://unpkg.com/input-knob"></script>
 	<script src="./src/utils/socket.io.js" async defer></script>

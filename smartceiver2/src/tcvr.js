@@ -100,6 +100,8 @@ class Transceiver {
 
 	#props
 
+	#defaultProps
+
 	#state = {}
 
 	#defaults = { rit: 0, xit: 0, step: 10, wpm: 28, paddleReverse: false }
@@ -126,7 +128,7 @@ class Transceiver {
 				port.signals.out.unbind(this)
 			}
 			this.#ports = []
-			this.fire(new TcvrSignal(SignalType.pwrsw, false), true)
+			this.fire(new TcvrSignal(SignalType.pwrsw, false), {force: true})
 		} else if (connectors.length) {
 			await this.connectRemoddle(remoddleOptions)
 			let firstConn = null
@@ -146,7 +148,7 @@ class Transceiver {
 			this._bindSignals()
 			await this._initState(firstConn)
 			// this.connectRemoddle(remoddleOptions)
-			this.fire(new TcvrSignal(SignalType.pwrsw, this.online), true)
+			this.fire(new TcvrSignal(SignalType.pwrsw, this.online), {force: true})
 
 			window.onbeforeunload = _ => {
 				this.disconnectRemoddle()
@@ -189,6 +191,7 @@ class Transceiver {
 			this.#state.agc = defaults.agc
 		
 		this.#props = props // set field after everything is done
+		this.#defaultProps = defaults
 	}
 
 	_buildFreqTable(props) {
@@ -313,16 +316,24 @@ class Transceiver {
 		this.fire(new TcvrSignal(SignalType.reverse, value))
 	}
 
+	get properties() {
+		return this.#props
+	}
+
+	get defaultProps() {
+		return this.#defaultProps
+	}
+
 	get connectorId() {
 		return this._connectorId
 	}
 
 	get online() {
-		return this.#props && this.#ports.some(port => port.connected)
+		return this.properties && this.properties.some(port => port.connected)
 	}
 
 	get bands() {
-		return this.#props && this.#props.bands
+		return this.properties && this.properties.bands
 	}
 
 	get band() {
@@ -331,20 +342,20 @@ class Transceiver {
 
 	setBand(controller, band) {
 		if (!this.online || this._denieded(controller)) return
-		if (!this.#props.bands.includes(band)) return
+		if (!this.properties.bands.includes(band)) return
 
 		this._d("band", band)
 		this.#state.band = band
 		this.setFreq(this, this.#state.freq[this.#state.band][this.#state.mode]) // call setter
 		this.fire(new TcvrSignal(SignalType.band, this.band))
 
-		if (controller.ignoreSubsignals) return
+		if (controller.preventSubcmd) return
 		// reset state - some tcvrs may store state on per band basis
 		setTimeout(_ => {
-			this.fire(new TcvrSignal(SignalType.mode, this.mode))
-			this.fire(new TcvrSignal(SignalType.gain, this.gain))
-			this.fire(new TcvrSignal(SignalType.agc, {agc: this.agc, mode: this.mode}))
-			this.fire(new TcvrSignal(SignalType.filter, {filter: this.filter, mode: this.mode}))
+			this.fire(new TcvrSignal(SignalType.mode, this.mode), {subcmd: true})
+			this.fire(new TcvrSignal(SignalType.gain, this.gain), {subcmd: true})
+			this.fire(new TcvrSignal(SignalType.agc, {agc: this.agc, mode: this.mode}), {subcmd: true})
+			this.fire(new TcvrSignal(SignalType.filter, {filter: this.filter, mode: this.mode}), {subcmd: true})
 		}, 2000) // wait for band change on tcvr
 	}
 
@@ -435,7 +446,7 @@ class Transceiver {
 	}
 
 	get modes() {
-		return this.#props && this.#props.modes
+		return this.properties && this.properties.modes
 	}
 
 	get mode() {
@@ -448,14 +459,14 @@ class Transceiver {
 		if (this.modes.includes(value)) {
 			this.#state.mode = value
 			this.fire(new TcvrSignal(SignalType.mode, this.#state.mode))
-			if (controller.ignoreSubsignals) return
-			this.fire(new TcvrSignal(SignalType.freq, this.#state.freq[this.#state.band][this.#state.mode]))
-			this.fire(new TcvrSignal(SignalType.filter, {filter: this.filter, mode: this.mode}))
+			if (controller.preventSubcmd) return
+			this.fire(new TcvrSignal(SignalType.freq, this.#state.freq[this.#state.band][this.#state.mode]), {subcmd: true})
+			this.fire(new TcvrSignal(SignalType.filter, {filter: this.filter, mode: this.mode}), {subcmd: true})
 		}
 	}
 
 	get filters() {
-		return this.#props && this.#props.filters(this.mode)
+		return this.properties && this.properties.filters(this.mode)
 	}
 
 	get filter() {
@@ -473,7 +484,7 @@ class Transceiver {
 	}
 
 	get gains() {
-		return this.#props && this.#props.gains(this.band)
+		return this.properties && this.properties.gains(this.band)
 	}
 
 	get gain() {
@@ -489,7 +500,7 @@ class Transceiver {
 	}
 
 	get agcTypes() {
-		return this.#props && this.#props.agcTypes
+		return this.properties && this.properties.agcTypes
 	}
 
 	get agc() {
@@ -518,11 +529,11 @@ class Transceiver {
 		this.#bus.fire(signal)
 	}
 
-	register(controller) {
+	attach(controller) {
 		if (controller.exclusive) {
 			this.#acl
 				.filter(ctlr => ctlr.id !== this.id)
-				.forEach(ctlr => ctlr.unregister())
+				.forEach(ctlr => ctlr.detach())
 			this.#acl = [this]
 		}
 		this.#acl.push(controller)

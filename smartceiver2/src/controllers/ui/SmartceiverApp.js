@@ -373,10 +373,15 @@ export class SmartceiverApp extends LitElement {
 		})
 		this.signals.out.bind(transceiver)
 
-		this.tcvr = new TcvrController('ui')
-		this.tcvr.registerTo(transceiver)
 		await this._initConnector()
-		setInterval(() => transceiver.keepAlive(), 5000)
+		if (this.remote && this.remoteController) {
+			this.remote.attachTo(transceiver)
+		} else {
+			this.tcvr = new TcvrController('ui')
+			this.tcvr.attachTo(transceiver)
+	
+			setInterval(() => this.tcvr.keepAlive(), 5000)
+		}
 	}
 		
 	async _initConnector() {
@@ -387,19 +392,20 @@ export class SmartceiverApp extends LitElement {
 		
 		const connectorsId = []
 		const connectorParams = {tcvr: {}, kredence: this.kredence}
-		const remotig = this.#params.get('remote')
-		const powron = this.#params.get('usb')
-		const sercat = this.#params.get('serial')
+		const remotig = this.#params.get('remotig')
+		const powron = this.#params.get('powron')
+		const sercat = this.#params.get('sercat')
+		const remote = this.#params.get('remote')
 		if (remotig && remotig.includes('@')) {
 			connectorsId.push('remotig')
 			[this.kredence.rig, this.kredence.qth] = 
 				remotig.trim().toLowerCase().split('@', 2)
 		}
-		if (powron && powron.includes('-')) {
+		if (powron) {
 			connectorsId.push('powron')
 			this._parseTcvrName({value: powron, connectorParams})
 		}
-		if (sercat && sercat.includes('-')) {
+		if (sercat) {
 			connectorsId.push('sercat')
 			this._parseTcvrName({value: sercat, connectorParams})
 		}
@@ -415,20 +421,28 @@ export class SmartceiverApp extends LitElement {
 			const connector = await connectorSelector.get(connectorId, connectorParams)
 			this.connectors.push(connector)
 		}
+
 		await this._fetchStatus()
 		this.pwrbtnDisable = this.connectors.length === 0
 		this.requestUpdate()
 
 		this.remoddle = this.#params.get('remoddle')
 		this.tcvr.reversePaddle = this.#params.get('reverse') === '1'
+
+		if (remote && !remotig && remote.includes('@')) {
+			[this.kredence.rig, this.kredence.qth] = remote.trim().toLowerCase().split('@', 2)
+			this.remote = new TcvrController('remotig')
+			const ctlModule = await import('../remotig.js')
+			this.remoteController = new ctlModule.RemotigController(this.remote, this.kredence. this.connectors, this.remoddle)
+		}
 	}
 
 	// eslint-disable-next-line class-methods-use-this
 	_parseTcvrName({value, connectorParams}) {
+		const p = connectorParams
 		const v = value.trim().toLowerCase()
-		if (!v) return
-		// eslint-disable-next-line no-param-reassign
-		[connectorParams.tcvr.manufacturer, connectorParams.tcvr.model] = v.split('-', 2)
+		if (v && v.includes('-'))
+			[p.tcvr.manufacturer, p.tcvr.model] = v.split('-', 2)
 	}
 
 	async _fetchStatus() {

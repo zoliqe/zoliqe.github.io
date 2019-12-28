@@ -100,7 +100,7 @@ class SignalsBinder {
 		this.#out = new Signals([
 				SignalType.keyDit, SignalType.keyDah, SignalType.keySpace, SignalType.wpm, SignalType.reverse, SignalType.ptt,
 				SignalType.mode, SignalType.filter, SignalType.gain, SignalType.agc, 
-				SignalType.pwrsw, SignalType.keepAlive,
+				SignalType.pwrsw, SignalType.keepAlive, SignalType.audioMute,
 				SignalType.freq, SignalType.band, SignalType.rit, SignalType.xit, SignalType.split, SignalType.step,
 			], outSignals, listenerId)
 	}

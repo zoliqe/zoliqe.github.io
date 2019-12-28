@@ -4,9 +4,13 @@ import {SignalType, TcvrSignal} from './utils/signals.mjs'
 export class TcvrController {
 	#id
 
-	#registered
+	#attached
 	
 	#tcvr
+
+	exclusive = false
+
+	preventSubcmd = false
 
 	constructor(controllerId) {
 		this.#id = controllerId
@@ -17,22 +21,26 @@ export class TcvrController {
 	}
 
 	get active() {
-		return this.#registered
+		return this.#attached
 	}
 
-	unregister() {
-		this.#registered = false
+	detach() {
+		this.#attached = false
 		this.#tcvr = null
 	}
 
-	registerTo(tcvr) {
-		tcvr.register(this)
+	attachTo(tcvr) {
+		tcvr.attach(this)
 		this.#tcvr = tcvr
-		this.#registered = true
+		this.#attached = true
 	}
 
 	async switchPower(connector, remoddleOptions) {
-		await this.#tcvr && this.#tcvr.switchPower(connector, remoddleOptions)
+		this.#tcvr && this.#tcvr.switchPower(connector, remoddleOptions)
+	}
+
+	async keepAlive() {
+		this.#tcvr && this.#tcvr.keepAlive()
 	}
 
 	keyDit() {
@@ -45,6 +53,14 @@ export class TcvrController {
 
 	keySpace() {
 		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.keySpace, 1))
+	}
+
+	get properties() {
+		return this.#tcvr && this.#tcvr.properties
+	}
+
+	get propDefaults() {
+		return this.#tcvr && this.#tcvr.propDefaults
 	}
 
 	set ptt(value) {

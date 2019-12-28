@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import { delay } from '../utils/time.mjs'
 import {SignalsBinder} from '../utils/signals.mjs'
 import { Keyer } from './extensions/keyer.mjs'
@@ -136,13 +137,13 @@ class PowronConnector {
 				const configurationInterfaces = this.#device.configuration.interfaces
 				configurationInterfaces.forEach(element => {
 					element.alternates.forEach(elementalt => {
-						if (elementalt.interfaceClass == 0xff) {
+						if (elementalt.interfaceClass === 0xff) {
 							this.#interfaceNumber = element.interfaceNumber
 							elementalt.endpoints.forEach(elementendpoint => {
-								if (elementendpoint.direction == "out") {
+								if (elementendpoint.direction === "out") {
 									this.#endpointOut = elementendpoint.endpointNumber
 								}
-								if (elementendpoint.direction == "in") {
+								if (elementendpoint.direction === "in") {
 									this.#endpointIn = elementendpoint.endpointNumber
 								}
 							})
@@ -178,27 +179,13 @@ class PowronConnector {
 		this.#device = null
 	}
 
-	async _on() {
-		await this.#powr.on()
-		this.#adapter.init && (await this.#adapter.init(async (data) => await this.serialData(data)))
-	}
-
-	async _keepAlive() {
-		await this.#powr.resetWatchdog()
-	}
-
-	async _off() {
-		this.#adapter.close && (await this.#adapter.close())
-		await this.#powr.off()
-	}
-
 	get connected() {
 		return this.#device != null
 	}
 
 	async checkState() {
 		// TODO maybe check present device by navigator.usb.getDevices()?
-		return {id: this.id} //this.connected ? {id: this.id} : null
+		return {id: this.id} // this.connected ? {id: this.id} : null
 	}
 	
 	get tcvrProps() {
@@ -210,7 +197,29 @@ class PowronConnector {
 	}
 
 	async serialData(data) {
-		return data != null && (await this._send('>' + data))
+		return data != null && this._send(`>${data}`)
+	}
+
+	onReceive(data) {
+		console.debug('POWRON rcvd:', decoder.decode(data))
+	}
+
+	onReceiveError(error) {
+		console.error('POWRON error:', error)
+	}
+	
+	async _on() {
+		await this.#powr.on()
+		this.#adapter.init && (await this.#adapter.init(async (data) => this.serialData(data)))
+	}
+
+	async _keepAlive() {
+		await this.#powr.resetWatchdog()
+	}
+
+	async _off() {
+		this.#adapter.close && (await this.#adapter.close())
+		await this.#powr.off()
 	}
 
 	async _serialBaudrate(baudrate) {
@@ -252,39 +261,30 @@ class PowronConnector {
 	async _send(data) {
 		console.debug(`POWRON <= ${data} `)
 		if (this.connected) {
-			const bytes = typeof data === 'string' ? encoder.encode(data + '\n') : data
+			const bytes = typeof data === 'string' ? encoder.encode(`${data}\n`) : data
 			await this.#device.transferOut(this.#endpointOut, bytes)
 			return true
-		} else {
-			console.error(`POWRON: data not sent ${ data } `)
-			return false
-		}
+		} 
+		console.error(`POWRON: data not sent ${ data }`)
+		return false
 	}
 
-	onReceive(data) {
-		console.debug('POWRON rcvd:', decoder.decode(data))
-	}
-
-	onReceiveError(error) {
-		console.error('POWRON error:', error)
-	}
-	
 	_initSignals() {
 		this.#signals = new SignalsBinder(this.constructor.id, {
-			keyDit: async () => await this.#keyer.send('.'),
-			keyDah: async () => await this.#keyer.send('-'),
-			keySpace: async () => await this.#keyer.send('_'),
-			wpm: async (value) => await this.#keyer.setwpm(value),
-			ptt: async (value) => await this.#keyer.ptt(value),
-			mode: async (value) => await this.#adapter.mode(value),
-			filter: async (value) => await this.#adapter.filter(value),
-			gain: async (value) => await this.#adapter.gain(value),
-			agc: async (value) => await this.#adapter.agc(value),
-			freq: async (value) => await this.#adapter.frequency(value),
-			split: async (value) => await this.#adapter.split(value),
-			rit: async (value) => await this.#adapter.rit(value),
-			xit: async (value) => await this.#adapter.xit(value),
-			keepAlive: async () => {await this._keepAlive()}
+			keyDit: async () => this.#keyer.send('.'),
+			keyDah: async () => this.#keyer.send('-'),
+			keySpace: async () => this.#keyer.send('_'),
+			wpm: async (value) => this.#keyer.setwpm(value),
+			ptt: async (value) => this.#keyer.ptt(value),
+			mode: async (value) => this.#adapter.mode(value),
+			filter: async (value) => this.#adapter.filter(value),
+			gain: async (value) => this.#adapter.gain(value),
+			agc: async (value) => this.#adapter.agc(value),
+			freq: async (value) => this.#adapter.frequency(value),
+			split: async (value) => this.#adapter.split(value),
+			rit: async (value) => this.#adapter.rit(value),
+			xit: async (value) => this.#adapter.xit(value),
+			keepAlive: async () => this._keepAlive()
 		})
 	}
 
@@ -345,7 +345,7 @@ class PowronConnector {
 }
 
 // device: '/dev/ttyUSB0', //'/dev/ttyS0','/dev/ttyAMA0','COM14'
-/*class PowronSocket {
+/* class PowronSocket {
 	constructor(socket, options = {device, keyerPin, pttPin, serialBaudRate}) {
 		this._socket = socket
 		this._socket.emit('openpowron', {device: options.device})
@@ -406,7 +406,7 @@ class PowronConnector {
 	_send(data) {
 		this._socket.emit('powron', data)
 	}
-}*/
+} */
 
 
 export {PowronConnector, PowronPins}
