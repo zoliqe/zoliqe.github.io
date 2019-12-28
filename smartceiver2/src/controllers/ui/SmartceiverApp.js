@@ -380,6 +380,7 @@ export class SmartceiverApp extends LitElement {
 			this.tcvr = new TcvrController('ui')
 			this.tcvr.attachTo(transceiver)
 	
+			this.tcvr.reversePaddle = this.#params.get('reverse') === '1'
 			setInterval(() => this.tcvr.keepAlive(), 5000)
 		}
 	}
@@ -427,7 +428,6 @@ export class SmartceiverApp extends LitElement {
 		this.requestUpdate()
 
 		this.remoddle = this.#params.get('remoddle')
-		this.tcvr.reversePaddle = this.#params.get('reverse') === '1'
 
 		if (remote && !remotig && remote.includes('@')) {
 			[this.kredence.rig, this.kredence.qth] = remote.trim().toLowerCase().split('@', 2)
