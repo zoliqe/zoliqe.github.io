@@ -31,10 +31,11 @@ class WebRTC {
 		this._isReady = false
 		this._isStarted = false
 		this._server = false
+		this._info = {}
 		this.options = options || {}
 	}
 
-	async disconnect() {
+	disconnect() {
 		this.sendMessage('bye')
 		this._isStarted = false
 		this._isReady = false
@@ -64,10 +65,14 @@ class WebRTC {
 	get connected() {
 		return this._isStarted && this._pc && this._control
 	}
+	
+	get info() {
+		return this._info
+	}
 
 	sendMessage(message) {
 		if (this._signaling && this._signaling.connected) {
-			console.debug('sendMessage:', message)
+			// console.debug('sendMessage:', message)
 			this.sendSignal('message', message)
 		}
 	}
@@ -106,7 +111,7 @@ class WebRTC {
 			this.disconnect()
 		})
 
-		this._signaling.on('joined', async (data) => { 
+		this._signaling.on('joined', (data) => { 
 			console.info(`Operating ${data.rig} as ${data.op}`)
 			this._isReady = true
 			this.iceServers = data.iceServers
@@ -115,11 +120,13 @@ class WebRTC {
 			// TODO try switch Call/Answer - doCall() here (need maybeStart on server)
 		})
 
-		console.debug('Joining', kredence.rig)
-		this.sendSignal('join', kredence)
+		this._signaling.on('connect', () => {
+			console.debug('Joining', kredence.rig)
+			this.sendSignal('join', kredence)
+			})
 	}
 
-	serveTransceiver(credentials) {
+	serveTransceiver(credentials, tcvrInfo) {
 		const kredence = credentials || {}
 		if (!kredence.qth || !kredence.rig /* || !kredence.token */) return;
 	
@@ -138,6 +145,7 @@ class WebRTC {
 			// whoNow = op
 			// authTime = secondsNow()
 			console.info(`Operator ${op} made a request to operate rig`)
+			this.sendMessage({type: 'tcvrinfo', ...tcvrInfo()})
 			this._isReady = true
 		})
 		this._signaling.on('pi', data => this.sendSignal('po', data))
@@ -173,6 +181,8 @@ class WebRTC {
 				candidate: message.candidate
 			})
 			this._pc.addIceCandidate(candidate)
+		} else if (message.type === 'tcvrinfo') {
+			this._info = message
 		} else if (message === 'bye' && this._isStarted) {
 			console.info('Session terminated.')
 			this.disconnect()

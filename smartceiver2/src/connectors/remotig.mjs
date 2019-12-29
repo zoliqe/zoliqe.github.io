@@ -1,15 +1,16 @@
+/* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-expressions */
 import {SignalsBinder} from '../utils/signals.mjs'
 import {AudioProcessor} from '../utils/audio.mjs'
 // import {Microphone} from '../utils/mic.mjs'
 import {delay} from '../utils/time.mjs'
 import {WebRTC as ConnectionService} from '../utils/webrtc.js'
+import {TransceiverProperties} from '../tcvr.js'
 
 class RemotigConnector {
-	static get id() { return 'remotig'; }
 
-	static get name() { return 'Remotig via WebRTC'; }
-	
+	#signals
+
 	constructor(kredence, {options = {
 		session: {
 			connectDelay: 5000,   // delay in ms after connection establishment
@@ -30,15 +31,17 @@ class RemotigConnector {
 		this._initSignals()
 	}
 
-	get id() {
-		return this.constructor.id
-	}
+	get id() { return 'remotig'; }
 
- 	connect() {
+ 	async connect() {
 		if (this._isReady || this._isStarted) return null
 
 		this._con.connectTransceiver(this.kredence)
 		return new Promise(resolve => {this._onconnect = () => resolve(this)})
+	}
+
+	async disconnect() {
+		this._con && this._con.disconnect()
 	}
 
 	// async reconnect() {
@@ -67,11 +70,11 @@ class RemotigConnector {
 	}
 
 	get tcvrProps() {
-		return this.#adapter.properties
+		return this._con.info && new TransceiverProperties(this._con.info.props)
 	}
 
 	get tcvrDefaults() {
-		return this.#adapter.defaults
+		return this._con.info && this._con.info.propDefaults
 	}
 
 	_onDisconnect() {
@@ -118,6 +121,7 @@ class RemotigConnector {
 			gain: async (value) => this._con.sendCommand(`gain=${value}`),
 			agc: async (value) => this._con.sendCommand(`agc=${value.agc}`),
 			freq: async (value) => this._con.sendCommand(`f=${value}`),
+			band: async (value) => this._con.sendCommand(`band=${value}`),
 			split: async (value) => this._con.sendCommand(`split=${value}`),
 			rit: async (value) => this._con.sendCommand(`rit=${value}`),
 			// xit: async (value) => this._con.sendCommand(`xit=${value}`),

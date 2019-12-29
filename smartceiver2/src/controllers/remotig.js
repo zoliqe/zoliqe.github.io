@@ -13,15 +13,12 @@ export class RemotigController {
 
 	#connectors
 
-	#remoddleOptions
-
-	constructor(tcvrController, kredence, connectors, remoddleOptions) {
+	constructor(tcvrController, kredence, connectors) {
 		this.#local = tcvrController
 		this.#local.exclusive = true
 		this.#local.preventSubcmd = true
 		this.#kredence = kredence || {}
 		this.#connectors = connectors
-		this.#remoddleOptions = remoddleOptions
 
 		this.#remote = new ConnectionService()
 		this.#remote.onControlOpen = () => this._onControlOpen()
@@ -30,12 +27,12 @@ export class RemotigController {
 		// this.#remote.onTrack = e => this._onTrack(e)
 		// this.#remote.onRemoveTrack = e => this._onRemoveTrack(e)
 		// this.#remote.ondisconnect = () => this._onDisconnect()
-		this.#remote.serveTrasnceiver(this.#kredence)
+		this.#remote.serveTransceiver(this.#kredence, () => this.info)
 	}
 
 	async _onControlOpen() {
-		await this.#local.switchPower(this.#connectors, this.#remoddleOptions)
-		this.#remote.sendCommand(`info=${JSON.stringify(this.info)}`)
+		// this.#remote.sendSignal('tcvrinfo', this.info)
+		await this.#local.poweron() // disable remoddle
 	}
 
 	_onControlClose() {
@@ -43,7 +40,7 @@ export class RemotigController {
 		this.#remote.sendSignal('logout', this.#kredence.rig)
 		this.#remote.disconnect()
 		// TODO delay
-		this.#local.switchPower([])
+		this.#local.poweroff()
 	}
 
 	_onControlMessage(event) {
@@ -51,7 +48,7 @@ export class RemotigController {
 		console.debug(`${new Date().toISOString()} cmd: ${msg}`)
 	
 		if (msg === 'poweron') {
-			this.local.keepAlive() // heartbeat for session live
+			this.#local.keepAlive() // heartbeat for session live
 	//		tcvr = tcvr || new Transceiver(tcvrAdapter())
 		} else if (msg === 'poweroff') {
 	//                tcvr && tcvr.off()
@@ -62,16 +59,22 @@ export class RemotigController {
 		// } else if (['keydn', 'keyup'].includes(msg)) {
 		// 	const state = msg.endsWith('dn')
 		// 	tcvr && (this.#local.key = state)
-		} else if (['.', '-', '_'].includes(msg)) {
-			this.#local.sendCw(msg)
+		} else if (msg === '.') {
+			this.#local.keyDit()
+		} else if (msg === '-') {
+			this.#local.keyDah()
+		} else if (msg === '_') {
+			this.#local.keySpace()
 		} else if (msg.startsWith('wpm=')) {
-			this.#local.wpm = msg.substring(4)
+			this.#local.wpm = Number(msg.substring(4))
 		} else if (msg.startsWith('f=')) {
-			this.#local.frequency = msg.substring(2)
+			this.#local.freq = Number(msg.substring(2))
+		} else if (msg.startsWith('band=')) {
+			this.#local.band = Number(msg.substring(5))
 		} else if (msg.startsWith('split=')) {
-			this.#local.split = msg.substring(6)
+			this.#local.split = Number(msg.substring(6))
 		} else if (msg.startsWith('rit=')) {
-			this.#local.rit = msg.substring(4)
+			this.#local.rit = Number(msg.substring(4))
 		// } else if (msg.startsWith('xit=')) {
 		// 	this.#local.xit = msg.substring(4)
 		} else if (msg.startsWith('ritclr')) {
@@ -81,13 +84,13 @@ export class RemotigController {
 		} else if (msg.startsWith('mode=')) {
 			this.#local.mode = msg.substring(5)
 		} else if (msg.startsWith('filter=')) {
-			this.#local.filter = msg.substring(7)
+			this.#local.filter = Number(msg.substring(7))
 		} else if (msg.startsWith('gain=')) {
-			this.#local.gain = msg.substring(5)
+			this.#local.gain = Number(msg.substring(5))
 		} else if (msg.startsWith('agc=')) {
 			this.#local.agc = msg.substring(4)
 		} else if (msg === 'info?') {
-			this.#remote.sendCommand(`info=${JSON.stringify(this.info)}`)
+			this.#remote.sendSignal('info', this.info)
 		} else if (msg.startsWith('ping=')) {
 			this.#remote.sendCommand(msg.replace('ping', 'pong'))
 		} else {
@@ -96,7 +99,10 @@ export class RemotigController {
 	}
 
 	get info() {
-		return { props: this.#local.properties, propDefaults: this.#local.propDefaults }
+		return { 
+			props: this.#local.properties.toJSON(), 
+			propDefaults: this.#local.propDefaults,
+		}
 	}
 	
 }

@@ -1,4 +1,4 @@
-import {TcvrSignal, SignalType} from '../../utils/signals.mjs'
+/* eslint-disable no-unused-expressions */
 import {nextValue, prevValue, nextValueBounds} from '../../utils/lists.js'
 
 class RemoddleMapper {

@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-expressions */
 import { delay } from '../utils/time.mjs'
 import {SignalsBinder} from '../utils/signals.mjs'
@@ -67,22 +68,22 @@ class PowronConnector {
 
 		this.#adapter = tcvrAdapter
 		this.#powr = new PowrSwitch({
-			state: async (state) => await this._pinState(this.#powerPins, state),
+			state: async (state) => this._pinState(this.#powerPins, state),
 			timeout: this.#timeout
 		})
 		this.#keyer = new Keyer({
-			send: async (cmd) => await this._send(cmd),
-			speed: async (wpm) => await this._send('S' + wpm),
+			send: async (cmd) => this._send(cmd),
+			speed: async (wpm) => this._send('S' + wpm),
 			state: () => this.#keyerPin != null,
-			key: async (state) => await this._pinState(this.#keyerPin, state),
-			ptt: async (state) => await this._pinState(this.#pttPins, state)
+			key: async (state) => this._pinState(this.#keyerPin, state),
+			ptt: async (state) => this._pinState(this.#pttPins, state)
 		}, keyerConfig)
 
 		this._initSignals()
 	}
 
-	static get id() {
-		return 'powron'
+	get id() {
+		return 'usbpowron'
 	}
 
 	async connect() {
@@ -108,11 +109,7 @@ class PowronConnector {
 			await delay(serialInitDelay)
 			await this._powerTimeout(this.#timeout)
 			this._serialBaudrate(this.#adapter.baudrate)
-			// setTimeout(() => {
-			// 	this._send(startSeq)
-			// 	setTimeout(() => this.serial(serialBaudRate), 1000)
-			// }, 3000)
-			await this._on()
+			// await this._on()
 		} catch (error) {
 			console.error('POWRON Connection error: ' + error)
 			throw error
@@ -270,7 +267,7 @@ class PowronConnector {
 	}
 
 	_initSignals() {
-		this.#signals = new SignalsBinder(this.constructor.id, {
+		this.#signals = new SignalsBinder(this.id, {
 			keyDit: async () => this.#keyer.send('.'),
 			keyDah: async () => this.#keyer.send('-'),
 			keySpace: async () => this.#keyer.send('_'),
@@ -284,7 +281,8 @@ class PowronConnector {
 			split: async (value) => this.#adapter.split(value),
 			rit: async (value) => this.#adapter.rit(value),
 			xit: async (value) => this.#adapter.xit(value),
-			keepAlive: async () => this._keepAlive()
+			keepAlive: async () => this._keepAlive(),
+			powrsw: async (value) => value ? this._on() : this._off(),
 		})
 	}
 

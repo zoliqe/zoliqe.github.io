@@ -30,17 +30,29 @@ export class TcvrController {
 	}
 
 	attachTo(tcvr) {
-		tcvr.attach(this)
+		tcvr.attachController(this)
 		this.#tcvr = tcvr
 		this.#attached = true
 	}
 
-	async switchPower(connector, remoddleOptions) {
-		this.#tcvr && this.#tcvr.switchPower(connector, remoddleOptions)
+	async connect(connectors) {
+		this.#tcvr && this.#tcvr.connect(connectors)
+	}
+
+	async disconnect() {
+		this.#tcvr && this.#tcvr.disconnect()
 	}
 
 	async keepAlive() {
 		this.#tcvr && this.#tcvr.keepAlive()
+	}
+
+	poweron() {
+		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.pwrsw, true), {force: true})
+	}
+
+	poweroff() {
+		this.#tcvr && this.#tcvr.fire(new TcvrSignal(SignalType.pwrsw, false), {force: true})
 	}
 
 	keyDit() {
@@ -60,7 +72,7 @@ export class TcvrController {
 	}
 
 	get propDefaults() {
-		return this.#tcvr && this.#tcvr.propDefaults
+		return this.#tcvr && this.#tcvr.defaultProps
 	}
 
 	set ptt(value) {
