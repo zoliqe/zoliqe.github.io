@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-expressions */
 import { LitElement, html, css } from 'lit-element'
@@ -7,15 +8,20 @@ import { SignalsBinder } from '../../utils/signals.js'
 import { get as resolveConnector } from '../../connector.js'
 import { nextValue } from '../../utils/lists.js'
 import { TcvrController } from '../../controller.js'
+import { WakeLock } from './wakelock.js'
 
 // import { template } from './templateMain.js';
+
+const _vfos = ['main', 'rit', 'split']
+const subvfoDefault = 'RIT/SPLIT'
 
 export class SmartceiverApp extends LitElement {
   static get properties() {
     return {
-      // title: { type: String },
-      // page: { type: String },
 			bandMHz: { type: String},
+			freqDisplay: {type: String},
+			vfo: {type: String},
+			subvfo: {type: String},
 			filter: {type: Number},
 			wpm: {type: Number},
 			mode: {type: String},
@@ -23,9 +29,7 @@ export class SmartceiverApp extends LitElement {
 			agc: {type: String},
 			powerState: {type: Boolean},
 			band: {type: Number},
-			freqDisplay: {type: String},
 			pwrbtnDisable: {type: Boolean},
-			// connectors: {type: Array},
     }
   }
 
@@ -38,7 +42,7 @@ export class SmartceiverApp extends LitElement {
         align-items: center;
         justify-content: flex-start;
         font-size: calc(10px + 2vmin);
-        color: #1a2b42;
+        color: white;
         /* max-width: 960px; */
         margin: 0 auto;
       }
@@ -98,9 +102,18 @@ export class SmartceiverApp extends LitElement {
 				padding-left: 10px;
 				padding-top: 10px;
 				text-align: left;
-				color: darkviolet;
+				color: lightgreen;
 				flex-grow: 100;
 				height: fit-content;
+				user-select: none;
+			}
+
+			.rit {
+				color: lightskyblue;
+			}
+
+			.split {
+				color: #dd6b88;
 			}
 
 			.tx {
@@ -108,8 +121,21 @@ export class SmartceiverApp extends LitElement {
 			}
 
 			.band {
-				color: slateblue;
+				color: lightsteelblue;
 				flex-grow: 1;
+			}
+
+			.subvfo {
+				font-size: 2.5em;
+			}
+
+			.vfoflag {
+				color: white;
+				font-size: 0.5em;
+				padding: 3px;
+				vertical-align: middle;
+				background-color: blue;
+        border-radius: 10px;
 			}
 
       ul {
@@ -247,14 +273,29 @@ export class SmartceiverApp extends LitElement {
 				text-align: center;
 				font: bold 200% monospace;
 				color: #aaa;
-			}`
+			}
+			
+			#fft {
+				/* border-color: gray;
+				border-width: 2px;
+				border-style: solid;
+				top: 44px; */
+				/* position: absolute; */
+				/*left: 0em;*/
+				/*top: 0em;*/
+				padding: 2px;
+				width: 100%;
+				height: 100%;
+				background-color: #505050;
+				color: #cfcfcf;
+				z-index: -10;
+			}
+			`
 	}
 	
 	static step2scale(step) {
-		return step * 200
+		return step * 100
 	}
-
-	#params
 
   constructor() {
     super()
@@ -262,11 +303,13 @@ export class SmartceiverApp extends LitElement {
 		this.connectors = {}
 		this.kredence = {}
 		this.remoddle = null
-		this.#params = new URLSearchParams(window.location.search)
+		this._wakeLock = new WakeLock()
+		this._params = new URLSearchParams(window.location.search)
 		this._initTcvr()
 
 		this.powerState = false
 		this.pwrbtnDisable = true
+		this.ptt = false
     this.operator = ':::'
     this.band = 20
 		this.bandMHz = 14
@@ -274,7 +317,9 @@ export class SmartceiverApp extends LitElement {
 		this.filter = 2000
 		this.agc = 'AGC'
 		this.mode = 'MODE'
-		this.gain = 0
+		this.gain = 0;
+		this.vfo = _vfos[0]
+		// this.subvfo = subvfoDefault
 		this.unackStateQueries = 0
 		setInterval(() => this._fetchStatus(), 5000)
   }
@@ -287,21 +332,18 @@ export class SmartceiverApp extends LitElement {
       <main>
       <ul class="app-grid">
 					<li class="card controls-card">
-							<button id="pwrbtn" 
-								class=${this._pwrbtnClass()} 
+							<button id="pwrbtn" class=${this._pwrbtnClass()} 
 								@click=${this.connectPower} 
 								?disabled=${this.pwrbtnDisable}>
 								PWR
 							</button>
-							<button id="catbtn"
-								class=${this._catbtnClass()} 
+							<button id="catbtn" class=${this._catbtnClass()} 
 								@click=${this.connectCat}
 								?disabled=${!this.connectorPwrConnected()}
 								?hidden=${this.connectorPwrWithCat()}>
 								CAT
 							</button>
-							<button id="pdlbtn"
-								class=${this._pdlbtnClass()} 
+							<button id="pdlbtn" class=${this._pdlbtnClass()} 
 								@click=${this.connectRemoddle}
 								?disabled=${this.pwrbtnDisable}
 								?hidden=${!this.powerState || !this.remoddle}>
@@ -324,14 +366,23 @@ export class SmartceiverApp extends LitElement {
               </button>
 					</li>
 					<li class="card knob-card">
-						<span id="band" name="band" class="freq-display band"
+						<!-- <div> -->
+					    <canvas id="fft" class="fft"></canvas>
+						<!-- </div> -->
+						<span id="band" name="band" class=${this._dispBandClass()}
 							@click=${this.switchBand}
 							?hidden=${!this.powerState}>${this.bandMHz}</span>
-						<span id="freq" name="freq" class="freq-display" 
+						<span id="freq" name="freq" class=${this._dispFreqClass()} 
 							@click=${this.switchStep}
 							?hidden=${!this.powerState}>${this.freqDisplay}</span>
-						<input-knob id="freq-knob" name="freq-knob" ?hidden=${!this.powerState}>
-							<div class="mark">▲</div>
+						<span id="subvfo" name="subvfo" class=${this._dispTxFreqClass()}
+							@click=${this.switchVfo}
+							?hidden=${!this.powerState}>
+							<span id="splitflag" class="vfoflag" ?hidden=${this.vfo !== 'split'}>SPLIT</span>
+							<span id="ritflag" class="vfoflag" ?hidden=${this.vfo !== 'rit'}>RIT</span>
+							TX:${this.subvfo}</span>
+						<input-knob id="freq-knob" name="freq-knob" 
+							?hidden=${!this.powerState}><div class="mark">▲</div>
 						</input-knob>
 						<!-- <div class="ctl">
 							<button onclick="decreaseWpm" class="ctl" hidden="[[!powerState]]">--</button>
@@ -359,12 +410,19 @@ export class SmartceiverApp extends LitElement {
 		this.knob = this.shadowRoot.getElementById('freq-knob')
 		// this.knob = this.$['freq-knob']
 		this.knob.addEventListener('knob-move-change', () => {
-			const curValue = Number.parseFloat(this.knob.value) / 10
-			if (this.tcvr) 
-				this.tcvr.freq = Math.floor(curValue) * 10
+			if (!this.tcvr) return 
+			const curValue = Math.floor(
+				Number.parseFloat(this.knob.value) / 10) * 10
+
+			if (this.vfo === 'main')
+				this.tcvr.freq = curValue
+			else if (this.vfo === 'split')
+				this.tcvr.split = curValue
+			else if (this.vfo === 'rit')
+				this.tcvr.rit = curValue - this.tcvr.freq
 		})
 
-		window.onbeforeunload = _ => {
+		window.onbeforeunload = () => {
 			this.powerState = true
 			this.connectPower()
 		}
@@ -375,8 +433,8 @@ export class SmartceiverApp extends LitElement {
 		this.transceiver = transceiver
 
 		this.signals = new SignalsBinder('ui', {
-			ptt: value => {this.freqDisplay.style = value ? "color: #883333;" : ''},
-			keyTx: value => {this.freqDisplay.style = value ? "color: #883333;" : ''},
+			ptt: value => {this.ptt = value},
+			keyTx: value => {this.ptt = value},
 			wpm: value => {this.wpm = value},
 			mode: value => {this.mode = value},
 			filter: value => {this.filter = value.filter},
@@ -384,22 +442,39 @@ export class SmartceiverApp extends LitElement {
 			agc: value => {this.agc = value.agc},
 			step: value => {
 				this.knob.scale = SmartceiverApp.step2scale(value)
-				this._displayFreq(this.knob.value)
+				this._displayFreq(this.tcvr.freq + this.tcvr.rit)
+				this._displayTxFreq(this.tcvr.split)
 			},
 			band: value => { 
 				this.band = value
-				const b = Bands[value]
-				this.bandMHz = Math.floor(b.name).toString().padStart(2, '_')
-				this.knob.min = b.freqFrom
-				this.knob.max = b.freqTo
+				this._knobParamsByBand()
 			},
 			freq: value => {
-				this.knob.value = value
-				this._displayFreq(value)
+				if (this.vfo === 'main') 
+					this.knob.value = value// + this.tcvr.rit
+				this._displayFreq(value + this.tcvr.rit)
+				// if (this.vfo === 'split')
+				this._displayTxFreq(this.tcvr.split)
+				// else
+					// this._displayTxFreq(this.tcvr.freq)
+			},
+			rit: value => {
+				if (this.vfo === 'rit')
+					this.knob.value = this.tcvr.freq + value
+				this._displayFreq(this.tcvr.freq + value)
+				this._displayTxFreq(this.tcvr.split)
+				// this.subvfo = `RIT ${value < 0 ? '' : '+'}${value}Hz`
+			},
+			split: value => {
+				if (value && this.vfo === 'split')
+					this.knob.value = value
+				this._displayFreq(this.tcvr.freq + this.tcvr.rit)
+				this._displayTxFreq(value)
 			},
 			pwrsw: value => { 
 				this.powerState = value
 				this.pwrbtnDisable = false
+				this._wakeLock.changeState(value)
 				// this.pwrbtn.className = value ? 'conbtn on' : 'conbtn'
 			},
 		})
@@ -412,27 +487,34 @@ export class SmartceiverApp extends LitElement {
 			this.tcvr = new TcvrController('ui')
 			this.tcvr.attachTo(transceiver)
 	
-			this.tcvr.reversePaddle = this.#params.get('reverse') === '1'
+			this.tcvr.reversePaddle = this._params.get('reverse') === '1'
 			setInterval(() => this.tcvr.keepAlive(), 5000)
 		}
 	}
 		
+	_knobParamsByBand() {
+		const b = Bands[this.band]
+		this.bandMHz = Math.floor(b.name).toString().padStart(2, '_')
+		this.knob.min = b.freqFrom
+		this.knob.max = b.freqTo
+	}
+
 	async _initConnector() {
-		const token = this.#params.get('token')
+		const token = this._params.get('token')
 		if (token) {
 			this.kredence.token = token.trim()
 		}
 		
 		const connectorParams = {tcvr: {}, kredence: this.kredence}
-		this._parseTcvrName({value: this.#params.get('tcvr'), connectorParams})
+		this._parseTcvrName({value: this._params.get('tcvr'), connectorParams})
 
-		this.remoddle = this.#params.get('remoddle')
+		this.remoddle = this._params.get('remoddle')
 
-		const remotig = this.#params.get('remotig')
-		const usbpowron = this.#params.get('usbpowron')
-		const serpowron = this.#params.get('serpowron')
-		const sercat = this.#params.get('sercat')
-		const remote = this.#params.get('remote')
+		const remotig = this._params.get('remotig')
+		const usbpowron = this._params.get('usbpowron')
+		const serpowron = this._params.get('serpowron')
+		const sercat = this._params.get('sercat')
+		const remote = this._params.get('remote')
 		if (remotig && remotig.includes('@')) {
 			[this.kredence.rig, this.kredence.qth] = 
 				remotig.trim().toLowerCase().split('@', 2)
@@ -469,7 +551,6 @@ export class SmartceiverApp extends LitElement {
 		this.requestUpdate()
 	}
 
-	// eslint-disable-next-line class-methods-use-this
 	_parseTcvrName({value, connectorParams}) {
 		const p = connectorParams
 		const v = value && value.trim().toLowerCase()
@@ -480,7 +561,7 @@ export class SmartceiverApp extends LitElement {
 	async _resolveConnector(id, params, type) {
 		try {
 			const connector = await resolveConnector(id, params)
-			console.debug(`Resolved connector params: id=${connector.id} params=${JSON.stringify(params)}`)
+			console.debug(`Resolved connector_params: id=${connector.id}_params=${JSON.stringify(params)}`)
 			this.connectors[type] = connector
 		} catch (e) {
 			console.error(e)
@@ -503,7 +584,7 @@ export class SmartceiverApp extends LitElement {
 		this._displayFreq(null) // display op
 	}
 
-	#fmt = new Intl.NumberFormat('en-US', {minimumIntegerDigits: 6})
+	_fmt = new Intl.NumberFormat('en-US', {minimumIntegerDigits: 6})
 	
 	_displayFreq(freq) {
 		if (freq === null || !this.tcvr || !Number.isInteger(freq)) {
@@ -511,10 +592,29 @@ export class SmartceiverApp extends LitElement {
 		}
 
 		const khzHz = (freq - Math.floor(freq / 1000000) * 1000000)
-		const frq = this.#fmt.format(khzHz).replace(',', '.')
+		const frq = this._fmt.format(khzHz).replace(',', '.')
 		const val = `.${frq}`
-		const lastDigit = (this.knob && this.knob.scale >= SmartceiverApp.step2scale(100)) ? 2 : 1
-		this.freqDisplay = val.substring(0, val.length - lastDigit)
+		this.freqDisplay = val.substring(0, val.length - this._nonTunableDigits())
+	}
+
+	_displayTxFreq(split) {
+		if (!split || !this.tcvr || !Number.isInteger(split)) {
+			split = this.tcvr.freq
+		}
+
+		const mhz = Math.floor(split / 1000000)
+		const khzHz = (split - mhz * 1000000)
+		const frq = this._fmt.format(khzHz).replace(',', '.')
+		this.subvfo = `${mhz}.${frq.substring(0, frq.length - this._nonTunableDigits())}`
+	}
+
+	_nonTunableDigits() {
+		if (!this.knob) return 0
+		let cnt = 1
+		if (this.knob.scale >= SmartceiverApp.step2scale(100)) cnt += 1
+		if (this.knob.scale >= SmartceiverApp.step2scale(1000)) cnt += 2 // include dot
+		if (this.knob.scale >= SmartceiverApp.step2scale(10000)) cnt += 1
+		return cnt
 	}
 
 	async connectPower() {
@@ -528,7 +628,7 @@ export class SmartceiverApp extends LitElement {
 				this.remote.poweroff()
 				await this.remote.disconnect()
 			}
-			setTimeout(() => this.requestUpdate(), 10000) // FIXME need event (onconnect)
+			setTimeout(() => this.requestUpdate(), 2000) // FIXME need event (onconnect)
 			return
 		}
 
@@ -536,16 +636,18 @@ export class SmartceiverApp extends LitElement {
 		const connectors = pwrWithCat ? this.connectors : { pwr: this.connectors.pwr }
 		if (this.tcvr) {
 			await this.tcvr.connect(connectors)
-			if (pwrWithCat)
+			if (pwrWithCat) {
+				console.info('pwr connector contains cat - auto powering on')
 				this.tcvr.poweron()
-			if (this.connectors.pwr && this.connectors.pwr.id === 'remotig')
+			}
+			if (this.connectors.pwr && this.connectors.pwr.id === 'remotig') {
+				// on remotig, click-event (user action) can be used to 'auto' connect remoddle
 				this.connectRemoddle()
+			}
 		} else if (this.remote) {
 			await this.remote.connect(connectors)
-			if (pwrWithCat)
-				this.remote.poweron()
 		}
-		setTimeout(() => this.requestUpdate(), 2000) // FIXME need event (onconnect)
+		setTimeout(() => this.requestUpdate(), 5000) // FIXME need event (onconnect)
 	}
 
 	connectorPwrWithCat() {
@@ -570,7 +672,6 @@ export class SmartceiverApp extends LitElement {
 			this.tcvr.poweron()
 		} else if (this.remote) {
 			this.remote.connect({ cat: this.connectors.cat })
-			// this.remote.poweron()
 		}
 	}
 
@@ -583,7 +684,6 @@ export class SmartceiverApp extends LitElement {
 
 	async connectRemoddle() {
 		if (!this.remoddle) return
-		// if (this._remoddleCtlr) return
 		await this.disconnectRemoddle() // remove previous instance
 
 		try {
@@ -608,6 +708,29 @@ export class SmartceiverApp extends LitElement {
 		return classMap({
 			conbtn: true,
 			on: this._remoddleCtlr != null
+		})
+	}
+
+	_dispBandClass() {
+		return classMap({
+			'freq-display': true,
+			'band': true,
+		})
+	}
+
+	_dispFreqClass() {
+		return classMap({
+			'freq-display': true,
+			'tx': this.ptt && this.vfo === 'main',
+			'rit': this.vfo === 'rit'
+		})
+	}
+
+	_dispTxFreqClass() {
+		return classMap({
+			'freq-display': true,
+			'subvfo': true,
+			'tx': this.vfo !== 'main'
 		})
 	}
 
@@ -643,7 +766,30 @@ export class SmartceiverApp extends LitElement {
 		this.tcvr.agc = nextValue(this.tcvr.agcTypes, this.agc)
 	}
 
-  // __navClass(page) {
-  //   return classMap({ active: this.page === page });
-  // }
+	switchVfo() {
+		if (this.vfo === 'split')
+			this.tcvr.split = 0
+		else if (this.vfo === 'rit')
+			this.tcvr.rit = 0
+
+		this.vfo = nextValue(_vfos, this.vfo)
+
+		this.knob.value = this.tcvr.freq
+		if (this.vfo === 'split') {
+			// this._knobParamsByBand()
+			// this.knob.value = this.tcvr.freq
+			this.tcvr.split = this.tcvr.freq
+		}/* else if (this.vfo === 'rit') {
+			// TODO rit knob settings from tcvr
+			// this.knob.min = -9999
+			// this.knob.max = 9999
+			// this.knob.value = 0
+			// this.tcvr.rit = 0
+		} else {
+			// this._knobParamsByBand()
+			this.knob.value = this.tcvr.freq
+			// this.subvfo = subvfoDefault
+		}*/
+	}
+
 }

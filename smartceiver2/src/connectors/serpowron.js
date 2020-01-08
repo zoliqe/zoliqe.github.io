@@ -104,11 +104,10 @@ class PowronConnector {
 			await delay(startSeqDelay)
 			this._send(startSeq)
 			await delay(serialInitDelay)
-			this._send('?')
-			// await this._powerTimeout(this.#timeout)
-			// await this._serialBaudrate(this.#adapter.baudrate)
-			// await this._on()
-			this._readLoop()
+			// this._send('?')
+			await this._powerTimeout(this.#timeout)
+			await this._serialBaudrate(this.#adapter.baudrate)
+			// this._readLoop()
 		} catch (error) {
 			console.error('POWRON Connection error:', error)
 			throw error
@@ -135,7 +134,8 @@ class PowronConnector {
 	async disconnect() {
 		if (!this.#device) return
 
-		await this._off()
+		await delay(400) // for poweroff signals 
+		// await this._off()
 		if (this.#reader)
 			this.#reader.cancel()
 		await this.#device.close()
@@ -225,7 +225,7 @@ class PowronConnector {
 		console.debug(`POWRON <= ${data} `)
 		if (this.connected && this.#device.writable) {
 			const writer = this.#device.writable.getWriter()
-			const bytes = typeof data === 'string' ? encoder.encode(data) : data
+			const bytes = typeof data === 'string' ? encoder.encode(`${data}\n`) : data
 			writer.write(bytes)
 			writer.releaseLock()
 			return true
