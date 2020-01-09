@@ -14,7 +14,7 @@ import { Microphone } from '../../utils/mic.js'
 // import { template } from './templateMain.js';
 
 const _vfos = ['main', 'rit', 'split']
-const subvfoDefault = 'RIT/SPLIT'
+// const subvfoDefault = 'RIT/SPLIT'
 
 export class SmartceiverApp extends LitElement {
   static get properties() {
@@ -81,7 +81,7 @@ export class SmartceiverApp extends LitElement {
       main {
         flex-grow: 1;
 				width: 100%;
-				background-color: #444;
+				background-color: #333;
       }
 
       .app-footer {
@@ -107,6 +107,7 @@ export class SmartceiverApp extends LitElement {
 				flex-grow: 100;
 				height: fit-content;
 				user-select: none;
+				z-index: 1;
 			}
 
 			.rit {
@@ -149,7 +150,7 @@ export class SmartceiverApp extends LitElement {
       }
       .card {
         /* border-radius: 30px;  */
-        background-color: #333;
+        /* background-color: #333; */
         min-height: 400px;
         display: flex;
 				align-content: flex-start;
@@ -165,7 +166,6 @@ export class SmartceiverApp extends LitElement {
 				justify-content: flex-end;
 				align-content: flex-start;
       }
-
       .controls-card {
 				margin: auto;
 				display: flex;
@@ -250,6 +250,7 @@ export class SmartceiverApp extends LitElement {
 				box-shadow: 0 0.3rem 0.3rem rgba(0, 0, 0, 0.5);
 				background: #777;
 				align-self: flex-end;
+				z-index: 1;
 			}
 			
 			input-knob::part(rotator) {
@@ -303,10 +304,10 @@ export class SmartceiverApp extends LitElement {
 				/* padding: 2px; */
 				width: 500px;
 				height: 300px;
-				background-color: #505050;
+				background-color: #333;
 				color: #cfcfcf;
 				/* z-index: -10; */
-				z-index: 1;
+				z-index: 0;
 			}
 			`
 	}
@@ -544,6 +545,7 @@ export class SmartceiverApp extends LitElement {
 		this._parseTcvrName({value: this._params.get('tcvr'), connectorParams})
 
 		this.remoddle = this._params.get('remoddle')
+		this.audioproc = this._params.get('audioproc')
 
 		const remotig = this._params.get('remotig')
 		const usbpowron = this._params.get('usbpowron')
@@ -674,8 +676,15 @@ export class SmartceiverApp extends LitElement {
 			if (pwrWithCat) {
 				console.info('pwr connector contains cat - auto powering on')
 				this.tcvr.poweron()
-				await this._mic.request()
-				this.audioProcessor.connectStream({streams: [this._mic.stream], track: this._mic.track})
+				if (this.audioproc) {
+					console.info('AudioProcessing ENABLED, Requesting access to microphone and connecting audio stream')
+					try {
+						await this._mic.request()
+						this.audioProcessor.connectStream({streams: [this._mic.stream], track: this._mic.track})
+					} catch (e) {
+						console.error("AudioProcessor error:", e)
+					}
+				}
 			}
 			if (this.connectors.pwr && this.connectors.pwr.id === 'remotig') {
 				// on remotig, click-event (user action) can be used to 'auto' connect remoddle
