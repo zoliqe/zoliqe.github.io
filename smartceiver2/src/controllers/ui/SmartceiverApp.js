@@ -46,6 +46,7 @@ export class SmartceiverApp extends LitElement {
         color: white;
         /* max-width: 960px; */
         margin: 0 auto;
+				text-shadow: 4px 4px 10px black;
       }
 
       header {
@@ -99,12 +100,8 @@ export class SmartceiverApp extends LitElement {
 				font-size: 4em;
 				font-weight: bold;
 				font-family: Courier New, Courier, monospace;
-				/*padding-right: 20px;*/
-				padding-left: 10px;
-				padding-top: 10px;
 				text-align: left;
 				color: lightgreen;
-				flex-grow: 100;
 				height: fit-content;
 				user-select: none;
 				z-index: 1;
@@ -127,19 +124,28 @@ export class SmartceiverApp extends LitElement {
 				flex-grow: 1;
 			}
 
+			.rxfreq {
+				padding-left: 10px;
+				width: 100%;
+				flex-grow: 100;
+			}
 			.subvfo {
 				font-size: 2.5em;
+				padding-left: 10px;
 			}
 
-			/* .vfoflag {
+			.vfoflag {
 				color: white;
-				font-size: 0.5em;
+				font-size: 0.2em;
 				padding: 3px;
 				vertical-align: middle;
+				text-align: center;
 				background-color: blue;
         border-radius: 10px;
+				writing-mode: vertical-rl;
+				text-orientation: upright;
 			}
- */
+
       ul {
         list-style: none;
 				display: flex;
@@ -158,12 +164,12 @@ export class SmartceiverApp extends LitElement {
       }
       .knob-card {
 				/* max-width: 700px; */
-				width: 700px;
+				width: 600px;
 				/* height: 450px; */
         display: flex;
 				flex-grow: 1;
 				flex-wrap: wrap;
-				justify-content: flex-end;
+				justify-content: space-between;
 				align-content: flex-start;
       }
       .controls-card {
@@ -291,24 +297,6 @@ export class SmartceiverApp extends LitElement {
 				background-color: #aaa;
         border-radius: 10px;
 			}
-
-			#fft {
-				/* border-color: gray;
-				border-width: 2px;
-				border-style: solid;
-				top: 44px; */
-				position: absolute;
-				left: 130px;
-				top: 110px;
-				/* right: 20px; */
-				/* padding: 2px; */
-				width: 500px;
-				height: 300px;
-				background-color: #333;
-				color: #cfcfcf;
-				/* z-index: -10; */
-				z-index: 0;
-			}
 			`
 	}
 	
@@ -386,23 +374,29 @@ export class SmartceiverApp extends LitElement {
               </button>
 					</li>
 					<li class="card knob-card">
-						<audio-processor id="audio-processor"></audio-processor>
-						<span id="band" name="band" class=${this._dispBandClass()}
-							@click=${this.switchBand}
-							?hidden=${!this.powerState}>${this.bandMHz}</span>
-						<span id="freq" name="freq" class=${this._dispFreqClass()} 
-							@click=${this.switchStep}
-							?hidden=${!this.powerState}>${this.freqDisplay}</span>
+						<audio-processor id="audio-processor"
+							?hidden=${!this.powerState}></audio-processor>
+						<span class="rxfreq">
+							<span id="band" name="band" class=${this._dispBandClass()}
+								@click=${this.switchBand}
+								?hidden=${!this.powerState}>${this.bandMHz}</span>
+							<span id="freq" name="freq" class=${this._dispFreqClass()} 
+								@click=${this.switchStep}
+								?hidden=${!this.powerState}>${this.freqDisplay}</span>
+						</span>
 						<span id="subvfo" name="subvfo" class=${this._dispTxFreqClass()}
 							@click=${this.switchVfo}
 							?hidden=${!this.powerState}>
-							<!-- <span id="splitflag" class="vfoflag" ?hidden=${this.vfo !== 'split'}>SPLIT</span> -->
-							<!-- <span id="ritflag" class="vfoflag" ?hidden=${this.vfo !== 'rit'}>RIT</span> -->
-							TX:${this.subvfo}</span>
+							<span class="vfoflag">
+								TX<br/>${this.vfo.toUpperCase()}
+							</span>
+							${this.subvfo}</span>
 						<input-knob id="freq-knob" name="freq-knob" 
 							?hidden=${!this.powerState}><div class="mark">▲</div>
-							<span id="splitflag" class="knobflag" ?hidden=${this.vfo !== 'split'}>SPLIT</span>
-							<span id="ritflag" class="knobflag" ?hidden=${this.vfo !== 'rit'}>RIT</span>
+							<span class="knobflag"
+								?hidden=${this.vfo !== 'split' && this.vfo !== 'rit'}>
+								${this.vfo.toUpperCase()}
+							</span>
 						</input-knob>
 						<!-- <div class="ctl">
 							<button onclick="decreaseWpm" class="ctl" hidden="[[!powerState]]">--</button>
@@ -556,6 +550,11 @@ export class SmartceiverApp extends LitElement {
 			[this.kredence.rig, this.kredence.qth] = 
 				remotig.trim().toLowerCase().split('@', 2)
 			await this._resolveConnector('remotig', connectorParams, 'pwr')
+
+			if (this.connectors.pwr) {
+				this.connectors.pwr.onTrack = e => this.audioProcessor.connectStream(e)
+				this.connectors.pwr.onDisconnect = () => this.audioProcessor.close()
+			}
 		}
 		if (sercat === '1') {
 			await this._resolveConnector('sercat', connectorParams, 'cat')
@@ -820,12 +819,14 @@ export class SmartceiverApp extends LitElement {
 
 		this.vfo = nextValue(_vfos, this.vfo)
 
-		this.knob.value = this.tcvr.freq
 		if (this.vfo === 'split') {
 			// this._knobParamsByBand()
-			// this.knob.value = this.tcvr.freq
-			this.tcvr.split = this.tcvr.freq
-		}/* else if (this.vfo === 'rit') {
+			if (!this.tcvr.split)
+				this.tcvr.split = this.tcvr.freq
+			this.knob.value = this.tcvr.split
+		} else
+			this.knob.value = this.tcvr.freq + this.tcvr.rit
+		/* else if (this.vfo === 'rit') {
 			// TODO rit knob settings from tcvr
 			// this.knob.min = -9999
 			// this.knob.max = 9999
@@ -835,7 +836,7 @@ export class SmartceiverApp extends LitElement {
 			// this._knobParamsByBand()
 			this.knob.value = this.tcvr.freq
 			// this.subvfo = subvfoDefault
-		}*/
+		} */
 	}
 
 }
