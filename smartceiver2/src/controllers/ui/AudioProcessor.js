@@ -22,9 +22,9 @@ export class AudioProcessor extends LitElement {
 				/* padding: 2px; */
 				width: 500px;
 				height: 300px;
-				background-color: #505050;
+				background-color: #333;
 				color: #cfcfcf;
-				z-index: -10;
+				z-index: 0;
 			}`
 	}
 	
