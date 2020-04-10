@@ -8,18 +8,19 @@
 <h2>Enumerated audioinput devices:</h2>
 <table id="text"></table>
 
-<script type="javascript">
-navigator.mediaDevices.enumerateDevices()
-.then(function(devices) {
-  devices.filter(device => device.kind === 'audioinput').forEach(function(device) {
-    let text = document.querySelector('#text')
-    text.innerHTML += `<tr><td>${device.deviceId}</td><td>${device.groupId}</td><td>${device.label}</td></tr>`
-    console.log(JSON.stringify(device) + ": label=" + device.label + ", id=" + device.deviceId);
-  });
-})
-.catch(function(err) {
-  console.log(err.name + ": " + err.message);
-});
+<script>
+  console.log('Enumerating...')
+  navigator.mediaDevices.enumerateDevices()
+  .then(function(devices) {
+    devices.filter(device => device.kind === 'audioinput').forEach(function(device) {
+      let text = document.querySelector('#text')
+      text.innerHTML += `<tr><td>${device.deviceId}</td><td>${device.groupId}</td><td>${device.label}</td></tr>`
+      console.log(JSON.stringify(device) + ": label=" + device.label + ", id=" + device.deviceId)
+    })
+  })
+  .catch(function(err) {
+    console.log(err.name + ": " + err.message)
+  })
 </script>
 </body>
 </html>
