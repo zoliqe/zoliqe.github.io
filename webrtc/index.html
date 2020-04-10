@@ -6,23 +6,31 @@
 
 <body>
 <h2>Enumerated audioinput devices:</h2>
-<table id="text">
+<table id="audioinput">
+  <th>deviceId</th><th>groupId</th><th>label</th>
+</table>
+<table id="audiooutput">
   <th>deviceId</th><th>groupId</th><th>label</th>
 </table>
 
 <script>
-  console.log('Enumerating...')
-  navigator.mediaDevices.enumerateDevices()
-  .then(function(devices) {
-    devices.filter(device => device.kind === 'audioinput').forEach(function(device) {
-      let text = document.querySelector('#text')
-      text.innerHTML += `<tr><td>${device.deviceId}</td><td>${device.groupId}</td><td>${device.label}</td></tr>`
-      console.log(JSON.stringify(device) + ": label=" + device.label + ", id=" + device.deviceId)
+  enumDevices('audioinput')
+  enumDevices('audiooutput')
+
+  function enumDevices(kind) {
+    console.log(`Enumerating ${kind} ...`)
+    navigator.mediaDevices.enumerateDevices()
+    .then(function(devices) {
+      devices.filter(device => device.kind === kind).forEach(function(device) {
+        let text = document.querySelector(`#${kind}`)
+        text.innerHTML += `<tr><td>${device.deviceId}</td><td>${device.groupId}</td><td>${device.label}</td></tr>`
+        console.log(JSON.stringify(device) + ": label=" + device.label + ", id=" + device.deviceId)
+      })
     })
-  })
-  .catch(function(err) {
-    console.log(err.name + ": " + err.message)
-  })
+    .catch(function(err) {
+      console.log(err.name + ": " + err.message)
+    })
+  }
 </script>
 </body>
 </html>
