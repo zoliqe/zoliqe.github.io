@@ -15,19 +15,24 @@
 </table>
 
 <script>
-  enumDevices('audioinput')
-  enumDevices('audiooutput')
+  navigator.mediaDevices.getUserMedia({audio: true}) // required to grant access to devices
+    .then(stream => {
+      enumDevices('audioinput')
+      enumDevices('audiooutput')
+    })
 
   function enumDevices(kind) {
     console.log(`Enumerating ${kind} ...`)
     navigator.mediaDevices.enumerateDevices()
-    .then(function(devices) {
-      devices.filter(device => device.kind === kind).forEach(function(device) {
-        let text = document.querySelector(`#${kind}`)
-        text.innerHTML += `<tr><td>${device.deviceId}</td><td>${device.groupId}</td><td>${device.label}</td></tr>`
-        console.log(JSON.stringify(device) + ": label=" + device.label + ", id=" + device.deviceId)
+      .then(devices => {
+        devices
+          .filter(device => device.kind === kind)
+          .forEach(device => {
+            let text = document.querySelector(`#${kind}`)
+            text.innerHTML += `<tr><td>${device.deviceId}</td><td>${device.groupId}</td><td>${device.label}</td></tr>`
+            console.log(JSON.stringify(device) + ": label=" + device.label + ", id=" + device.deviceId)
+          })
       })
-    })
     .catch(function(err) {
       console.log(err.name + ": " + err.message)
     })
