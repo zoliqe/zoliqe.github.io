@@ -4,6 +4,8 @@ class SmartceiverWebUSBConnector {
     this.devFilters = [
       { 'vendorId': 0x2341, 'productId': 0x8036 },
       { 'vendorId': 0x2341, 'productId': 0x8037 },
+      { 'vendorId': 0x2886, 'productId': 0x802F }, // Seeed XIAO M0
+			{ 'vendorId': 0xcafe, 'productId': 0x4011 }, // TinyUSB on RPi Pico
     ]
   }
 
