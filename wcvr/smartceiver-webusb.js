@@ -79,7 +79,7 @@ class SmartceiverWebUSBPort {
   _open() {
     let decoder = new TextDecoder();
     let readLoop = () => {
-      this._device.transferIn(5, 64).then(result => {
+      this._device.transferIn(0, 64).then(result => {
         this.onReceive(decoder.decode(result.data));
         readLoop();
       }, error => {
@@ -92,13 +92,14 @@ class SmartceiverWebUSBPort {
           return this._device.selectConfiguration(1);
         }
       })
-      .then(() => this._device.claimInterface(2))
+      .then(() => this._device.claimInterface(0))
+      .then(() => this._device.selectAlternateInterface(0, 0))
       .then(() => this._device.controlTransferOut({
         'requestType': 'class',
         'recipient': 'interface',
         'request': 0x22,
         'value': 0x01,
-        'index': 0x02
+        'index': 0x00
       }))
       .then(() => {
         readLoop();
@@ -111,13 +112,13 @@ class SmartceiverWebUSBPort {
       'recipient': 'interface',
       'request': 0x22,
       'value': 0x00,
-      'index': 0x02
+      'index': 0x00
     })
       .then(() => this._device.close());
   }
 
   send(data) {
-    return this._device.transferOut(4, this._encoder.encode(data));
+    return this._device.transferOut(0, this._encoder.encode(data));
   }
 
   onReceive(data) {
