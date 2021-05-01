@@ -1,13 +1,18 @@
 
+const _encoder = new TextEncoder()
+const _decoder = new TextDecoder()
+
 class SmartceiverWebUSBConnector {
-  constructor() {
-    this.devFilters = [
-      { 'vendorId': 0x2341, 'productId': 0x8036 },
-      { 'vendorId': 0x2341, 'productId': 0x8037 },
-      { 'vendorId': 0x2886, 'productId': 0x802F }, // Seeed XIAO M0
+
+  constructor(deviceFilters = [
+			{ 'vendorId': 0x2341, 'productId': 0x8036 },
+			{ 'vendorId': 0x2341, 'productId': 0x8037 },
+			{ 'vendorId': 0x2886, 'productId': 0x802F }, // Seeed XIAO M0
 			{ 'vendorId': 0xcafe, 'productId': 0x4011 }, // TinyUSB on RPi Pico
-    ]
-  }
+		],
+	) {
+		this._deviceFilters = deviceFilters
+	}
 
   static get id() { return 'smartceiver-webusb'; }
   static get name() { return 'SmartCeiver standalone WebUSB'; }
@@ -15,7 +20,7 @@ class SmartceiverWebUSBConnector {
 
   connect(tcvr, successCallback) {
     // this.requestPort()
-    navigator.usb.requestDevice({ 'filters': this.devFilters }).then(device => {
+    navigator.usb.requestDevice({ 'filters': this._deviceFilters }).then(device => {
       console.log('Connecting to ' + device.productName)
       this._connectDevice(device).then(port => {
         console.log('Connected ' + device.productName)
@@ -35,7 +40,7 @@ class SmartceiverWebUSBConnector {
   };
 
   _bindCommands(tcvr, port) {
-    port.onReceive = data => {
+    port.receive = data => {
       console.log('rcvd: ' + data)
       if (data.includes('TP1;')) {
         tcvr.fire(new TcvrEvent(EventType.ptt, true));
@@ -70,64 +75,119 @@ class SmartceiverWebUSBConnector {
 }
 
 class SmartceiverWebUSBPort {
-  constructor(device) {
+// 	_interfaceNumber = 2  // original interface number of WebUSB Arduino demo
+// 	_endpointIn = 5       // original in endpoint ID of WebUSB Arduino demo
+// 	_endpointOut = 4      // original out endpoint ID of WebUSB Arduino demo
+	_interfaceNumber = 0  // TinyUSB
+	_endpointIn = 0       // TinyUSB
+	_endpointOut = 0      // TinyUSB
+
+	constructor(device, receiveSeparator = '\n', sendSeparator = '\n') {
     this._device = device;
-    this._encoder = new TextEncoder();
-    this._buffer = ''
+		this._receiveSeparator = receiveSeparator
+		this._sendSeparator = sendSeparator
+		// this._sendSeparator = _encoder.encode(sendSeparator)
+		this._receiveBuffer = ''
   }
 
   _open() {
-    let decoder = new TextDecoder();
-    let readLoop = () => {
-      this._device.transferIn(0, 64).then(result => {
-        this.onReceive(decoder.decode(result.data));
-        readLoop();
-      }, error => {
-        this.onReceiveError(error);
-      });
-    };
     return this._device.open()
       .then(() => {
-        if (this._device.configuration == null) {
-          return this._device.selectConfiguration(1);
+        if (this._device.configuration === null) {
+          return this._device.selectConfiguration(1)
         }
-      })
-      .then(() => this._device.claimInterface(0))
-      .then(() => this._device.selectAlternateInterface(0, 0))
+			})
+			.then(() => {
+				const configurationInterfaces = this._device.configuration.interfaces
+				configurationInterfaces.forEach(element => {
+					element.alternates.forEach(elementalt => {
+						if (elementalt.interfaceClass === 0xff) {
+							this._interfaceNumber = element.interfaceNumber
+							elementalt.endpoints.forEach(elementendpoint => {
+								if (elementendpoint.direction === "out") {
+									this._endpointOut = elementendpoint.endpointNumber
+								}
+								if (elementendpoint.direction === "in") {
+									this._endpointIn = elementendpoint.endpointNumber
+								}
+							})
+						}
+					})
+				})
+			})
+      .then(() => this._device.claimInterface(this._interfaceNumber))
+			.then(() => this._device.selectAlternateInterface(this._interfaceNumber, 0))
       .then(() => this._device.controlTransferOut({
         'requestType': 'class',
         'recipient': 'interface',
         'request': 0x22,
         'value': 0x01,
-        'index': 0x00
+        'index': this._interfaceNumber
       }))
-      .then(() => {
-        readLoop();
-      });
+      .then(() => this._readLoop())
   }
 
-  disconnect() {
-    return this._device.controlTransferOut({
-      'requestType': 'class',
-      'recipient': 'interface',
-      'request': 0x22,
-      'value': 0x00,
-      'index': 0x00
-    })
-      .then(() => this._device.close());
-  }
+	_readLoop() {
+	  this._device.transferIn(this._endpointIn, 64).then(result => {
+	    this._handleReceived(_decoder.decode(result.data))
+	    this._readLoop()
+	  }, error => this.receiveError(error))
+	}
 
-  send(data) {
-    return this._device.transferOut(0, this._encoder.encode(data));
-  }
+	async disconnect() {
+		if (!this._device) return
 
-  onReceive(data) {
-    console.log('Received: ' + data);
-  }
+		await this._device.controlTransferOut({
+			'requestType': 'class',
+			'recipient': 'interface',
+			'request': 0x22,
+			'value': 0x00,
+			'index': this._interfaceNumber
+		})
+		console.debug('USB close()')
+		await this._device.close()
+		this._device = null
+	}
 
-  onReceiveError(error) {
-    console.log('Receive error: ' + error);
-  }
+	_handleReceived(data) {
+		for (const c of data) {
+			if (c === this._receiveSeparator) {
+				const cmd = this._receiveBuffer.trim()
+				this._receiveBuffer = ''
+				if (cmd)
+					this.receive(cmd)
+			} else {
+				this._receiveBuffer += c
+			}
+		}
+	}
+
+	get connected() {
+		return this._device != null
+	}
+
+	receive(data) {
+		// callback
+	}
+
+	receiveError(error) {
+		console.error('USB receive error:', error)
+	}
+	
+	getDeviceName() {
+		return `${this._device.productName} (${this._device.manufacturerName})`
+	}
+
+	async send(data) {
+		console.debug(`USB <= ${data}`)
+		if (this.connected) {
+			const bytes = typeof data === 'string' ? _encoder.encode(`${data}${this._sendSeparator}`) : data
+			await this._device.transferOut(this._endpointOut, bytes)
+			return true
+		}
+		console.error(`USB: data not sent ${data}`)
+		return false
+	}
 }
 
 tcvrConnectors.register(new SmartceiverWebUSBConnector());
