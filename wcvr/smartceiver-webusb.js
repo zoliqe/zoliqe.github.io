@@ -20,18 +20,18 @@ class SmartceiverWebUSBConnector {
 
   connect(tcvr, successCallback) {
     // this.requestPort()
-    navigator.usb.requestDevice({ 'filters': this._deviceFilters }).then(device => {
-      console.log('Connecting to ' + device.productName)
-      this._connectDevice(device).then(port => {
-        console.log('Connected ' + device.productName)
-        this._bindCommands(tcvr, port)
-        successCallback(port);
-      }, error => {
-         console.log('Connection error (2): ' + error);
-      });
-    }).catch(error => {
-      console.error('Connection error (1): ' + error);
-    });
+//     navigator.usb.requestDevice({ 'filters': this._deviceFilters }).then(device => {
+//       console.log('Connecting to ' + device.productName)
+//       this._connectDevice(device).then(port => {
+//         console.log('Connected ' + device.productName)
+//         this._bindCommands(tcvr, port)
+//         successCallback(port);
+//       }, error => {
+//          console.log('Connection error (2): ' + error);
+//       });
+//     }).catch(error => {
+//       console.error('Connection error (1): ' + error);
+//     });
   }
 
   _connectDevice(device) {
