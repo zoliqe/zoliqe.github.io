@@ -220,7 +220,7 @@ activeBtn.addEventListener('click', e => {
     channelCount: 1,
     volume: 1.0,
     autoGainControl: false,
-//     echoCancellation: false,
+    echoCancellation: {exact: false},
     noiseSuppression: false
   }})
     .then(stream => {
