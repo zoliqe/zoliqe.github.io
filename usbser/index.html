@@ -38,9 +38,9 @@ Select:
 
 or
 <!-- bulk endpoint from device -->
-epin: <input id='epin' name='epin' size='1' value='2'/>
+epin: <input id='epin' name='epin' size='1' value='0'/>
 <!-- bulk endpoint to device -->
-epout: <input id='epout' name='epout' size='1' value='3'/>
+epout: <input id='epout' name='epout' size='1' value='0'/>
 and:
 <button type='button' onclick="Usb();">USB</button>
 
@@ -115,7 +115,9 @@ async function Usb()
     try {
         usb = await navigator.usb.requestDevice({ filters: [filter] });
         await usb.open();
-        await usb.selectConfiguration(1);
+        if (usb.configuration === null) {
+            await usb.selectConfiguration(1);
+        }
         await usb.claimInterface(0);
         setTimeout(Receive, 100);
         document.getElementById("command").disabled = false;
