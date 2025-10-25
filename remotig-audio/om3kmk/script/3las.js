@@ -1,6 +1,6 @@
 var _3LAS_Settings = /** @class */ (function () {
     function _3LAS_Settings() {
-        this.SocketHost = 'om3kmk.ham.gd';//document.location.hostname ? document.location.hostname : "127.0.0.1";
+        this.SocketHost = '192.168.1.2';//document.location.hostname ? document.location.hostname : "127.0.0.1";
         this.SocketPort = 8080;
         this.SocketPath = "/";
         this.WebRTC = new WebRTC_Settings();
