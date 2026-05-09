@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Remoddle
+Comment=Remote paddle for remotig
+Exec=/home/pi/remoddle.sh
+Icon=/usr/share/icons/hicolor/32x32/apps/alacarte.png
+Terminal=true
+Categories=Network;HamRadio;
+

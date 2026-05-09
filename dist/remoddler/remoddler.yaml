@@ -1,0 +1,10 @@
+login: none
+toneFreq: 650
+toneAmpl: 25
+catUart: /dev/ttyAMA0
+switchGpio: 16
+rotary0Id: 14
+
+#bands: 160, 80, 40, 30, 20, 17, 15, 12, 10, 6
+#steps: 10, 100, 1000
+#filters: 1000, 500, 200, 50, 2700
