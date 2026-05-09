@@ -1,7 +1,7 @@
 cd
-cd remoddler
+#cd remoddler
 #dart pub get
-cd bin
+#cd bin
 #echo "Compiling remoddler..."
 #dart compile exe remoddler.dart
 
