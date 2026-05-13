@@ -13,3 +13,7 @@ echo "enabling access to Serial hw..."
 sudo raspi-config nonint do_serial_hw 0
 echo "disabling console on Serial..."
 sudo raspi-config nonint do_serial_cons 1
+echo "enabling i2c..."
+sudo raspi-config nonint do_i2c 0
+
+sudo usermod -aG sudo $USER
