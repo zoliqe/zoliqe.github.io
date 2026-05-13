@@ -33,3 +33,5 @@ chmod +x ~/lcd.sh
 cp lcd_print.sh ~/lcd_print.sh
 chmod +x ~/lcd_print.sh
 cp remoddler.yaml ~/remoddler.yaml
+cp latest ~/latest
+cp -r bundle/* ~/

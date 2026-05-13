@@ -12,9 +12,9 @@ if [[ "$str1" == "$str2" ]]; then
 else
     echo "Timestamps differs, downloading update."
     pkill remoddler
-    curl https://zoliqe.github.io/dist/remoddle/remoddler.exe --output $1/remoddler.exe
-    curl https://zoliqe.github.io/dist/remoddle/rigller.exe --output $1/rigller.exe
-    curl https://zoliqe.github.io/dist/remoddle/latest --output $1/latest
+    curl https://zoliqe.github.io/dist/remoddle/remoddler.exe --output $dir/remoddler.exe
+    curl https://zoliqe.github.io/dist/remoddle/rigller.exe --output $dir/rigller.exe
+    curl https://zoliqe.github.io/dist/remoddle/latest --output $dir/latest
 fi
 
 echo "Starting remoddle service..."
@@ -28,5 +28,6 @@ echo "Starting rig controller..."
 $dir/rigller.exe
 pkill remoddler
 
+sleep 5
 sudo shutdown
 
