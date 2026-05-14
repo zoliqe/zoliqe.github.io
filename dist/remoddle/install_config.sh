@@ -17,6 +17,6 @@ echo "enabling i2c..."
 sudo raspi-config nonint do_i2c 0
 
 sudo usermod -aG sudo $USER
-sudo echo "$USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/010_nopasswd
+sudo echo "om4aa ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/010_nopasswd
 sudo chmod 640 /etc/sudoers.d/010_nopasswd
 

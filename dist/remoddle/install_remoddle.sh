@@ -24,8 +24,6 @@ cp remoddle.sh ~/remoddle.sh
 chmod +x ~/remoddle.sh
 cp remoddler.exe ~/remoddler.exe
 chmod +x ~/remoddler.exe
-cp rigller.exe ~/rigller.exe
-chmod +x ~/rigller.exe
 cp paddle.py ~/paddle.py
 chmod +x ~/paddle.py
 cp lcd.sh ~/lcd.sh
@@ -35,3 +33,5 @@ chmod +x ~/lcd_print.sh
 cp remoddler.yaml ~/remoddler.yaml
 cp latest ~/latest
 cp -r bundle/* ~/
+chmod +x ~/rigller
+ln -s ~/rigller ~/rigller.exe
