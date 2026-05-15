@@ -153,11 +153,11 @@ def watch_paddle():
     lastTime = now()
     generate_tones()    
 
-	# set bias first
+    # set bias first
     with gpiod.request_lines(chipPath, consumer="remoddle-paddle", config=gpioConfig) as request:
-		dit_state = request.get_value(ditLine) == Value.INACTIVE
-		dah_state = request.get_value(dahLine) == Value.INACTIVE
-	
+        dit_state = request.get_value(ditLine) == Value.INACTIVE
+        dah_state = request.get_value(dahLine) == Value.INACTIVE
+
     with gpiod.request_lines(chipPath, consumer="remoddle-paddle", config=gpioConfig) as request:
         while running:
             t0 = now()
