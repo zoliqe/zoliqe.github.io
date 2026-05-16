@@ -1,6 +1,7 @@
 #!/bin/bash
 dir=$HOME
 
+sleep 3
 echo "Checking for remoddle update..."
 str1=`cat $dir/latest`
 str2=`curl -s https://zoliqe.github.io/dist/remoddle/latest`
@@ -19,7 +20,7 @@ fi
 
 echo "Starting remoddle service..."
 #enc0=`journalctl | grep "input: rotary@14" | awk '{print $9}' - | awk -F '/' '{print $6}' -`
-$dir/remoddler.exe --debug -d $dir remove &
+$dir/remoddler.exe -d $dir &
 
 sleep 0.5
 sudo $dir/lcd.sh Hello ready
