@@ -12,7 +12,7 @@ echo "local:  $str1" >> $log
 echo "remote: $str2" >> $log
 
 if [[ "$str1" == "$str2" ]]; then
-#    echo "Everything updated" >> $log
+    echo "Everything updated"
 else
     echo "Timestamps differs, downloading update." >> $log
     curl https://zoliqe.github.io/dist/remoddle/remoddler.exe --output $dir/remoddler.exe >> $log
