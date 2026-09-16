@@ -1,0 +1,134 @@
+<html>
+  <head>
+    <title>AD9850-AA</title>
+    <style>
+button {
+  height: 36px;
+  margin-right: 20px;
+}
+
+.panel {
+  display: flex;
+}
+.panel #log {
+  width: 90%;
+  padding-top: 0.5em;
+}
+.panel #link {
+  padding-top: 0.5em;
+}
+
+.graph-place {
+  height: 430px;
+}
+.graph {
+  border-color: gray;
+  border-width: 2px;
+  border-style: solid;
+  top: 3em;
+  position: absolute;
+  padding: 2px;
+  width: 98%;
+  height: 410px;
+  background-color: lightgray;
+/*  color: blue;*/
+}
+
+.reverse {
+  font-size: 80px;
+  position: absolute;
+  z-index: 1;
+  right: 1em;
+  opacity: 0.5;
+  top: 1em;
+  text-shadow: -2px -2px 0px rgba(255, 255, 255, 0.9), 2px 2px 0px rgba(0, 0, 0, 0.7);
+  color: transparent;
+  font-weight: 400;
+  user-select: none;
+}
+.freq {
+  font-size: 80px;
+  position: absolute;
+  z-index: 1;
+  left: 1em;
+  opacity: 0.5;
+  top: 1em;
+  text-shadow: -2px -2px 0px rgba(255, 255, 255, 0.9), 2px 2px 0px rgba(0, 0, 0, 0.7);
+  color: transparent;
+  font-weight: 400;
+  user-select: none;
+}
+
+.controls {
+  display: flex;
+  vertical-align: center;
+}
+.controls .knob-place {
+  flex-grow: 3;
+  /*width: 70%;*/
+  padding-left: 28%;
+}
+.controls .knob {
+  position: relative;
+  background-color: lightgray;/*#09f*/
+  background: radial-gradient(circle, darkgray, black);
+  /*margin: 20px auto;*/
+  /*margin-left: 26%;*/
+  width: 14em;
+  height: 14em;
+  border-radius: 7em;
+}
+.controls .dimp {
+  position: absolute;
+  background-color: gray;
+  background: radial-gradient(circle, #3d3d3d, #1e1e1e);
+  margin: 1em auto;
+  left: 45%;
+  width: 3em;
+  height: 3em;
+  border-radius: 1.5em;
+}
+.controls button {
+  margin-top: 7em;
+}
+.controls #mhzUp {
+  /*margin-left: 32%;*/
+}
+.controls :last-child {
+  margin-right: 0;
+}
+    </style>
+  </head>
+
+  <body>
+    <div class="panel">
+      <button type="button" id="connectButton">Connect!</button>
+      <span id="log">Loading</span>
+      <span id="link"><a href="multi.html">FullScan</a></span>
+    </div>
+
+    <div class="graph-place">
+      <canvas id="graph" class="graph"></canvas>
+      <span id="freq" class="freq"></span>
+      <span id="reverse" class="reverse"></span>
+    </div>
+
+    <div class="controls">
+      <button id="bandDn">&lt;&lt; Band</button>
+      <button id="mhzDn">1 MHz --</button>
+      <div class="knob-place">
+        <div id="knob" class="knob">
+          <span id="dimp" class="dimp"></span>
+        </div>
+      </div>
+      <button id="mhzUp">1 MHz ++</button>
+      <button id="bandUp">Band &gt;&gt;</button>
+    </div>
+  </body>
+
+  <!--<script src="chart.bundle.min.js"></script>-->
+  <script src="microbit.js"></script>
+  <script src="knob.js"></script>
+  <script src="main.js"></script>
+
+</html>

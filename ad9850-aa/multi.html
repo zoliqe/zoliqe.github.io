@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>AD9850-AA</title>
+    <style>
+button {
+  height: 2.5em;
+}
+.graph-place {
+}
+.graph {
+  border-color: gray;
+  border-width: 0.1em;
+  border-style: solid;
+  margin-top: 0.8em;
+  /*position: absolute;*/
+  /*padding: 5px;*/
+  background-color: lightgray;
+}
+
+    </style>
+  </head>
+
+  <body>
+    <button type="button" id="connectButton">Connect!</button>
+    <!--<button type="button" id="freqButton">Set freq</button>-->
+    <!--<input type="number" id="freq" value="7050" min="3000" max="30000" step="10" />-->
+
+    <span id="log">Loading</span>
+    <span style="right: 20px; text-align: right;"><a href="../">FreqShot</a></span>
+
+    <div class="graph-place">
+      <canvas id="graph" class="graph"></canvas>
+    </div>
+  </body>
+
+  <script src="chart.bundle.min.js"></script>
+  <script src="microbit.js"></script>
+  <script src="multi.js"></script>
+
+</html>
