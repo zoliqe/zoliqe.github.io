@@ -3,7 +3,7 @@ Version=1.0
 Type=Application
 Name=Remoddle
 Comment=Remote paddle for remotig
-Exec=/home/om4aa/remoddle.sh
+Exec=chromium --noerrdialogs --disable-infobars --start-maximized --check-for-update-interval=31536000 --app=https://zoliqe.github.io/rigller/
 Icon=/usr/share/icons/hicolor/32x32/apps/alacarte.png
 Terminal=true
 Categories=Network;HamRadio;

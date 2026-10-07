@@ -20,18 +20,24 @@ cp Remoddle.desktop ~/Desktop/
 mkdir ~/.config/autostart
 ln -s ~/Desktop/Remoddle.desktop ~/.config/autostart/
 
-cp remoddle.sh ~/remoddle.sh
-chmod +x ~/remoddle.sh
-cp remoddle.exe ~/remoddle.exe
-chmod +x ~/remoddle.exe
-cp paddle.py ~/paddle.py
-chmod +x ~/paddle.py
+cp start.sh ~/start.sh
+chmod +x ~/start.sh
+cp stop.sh ~/stop.sh
+chmod +x ~/stop.sh
+echo "$HOME/start.sh" >~/.profile
+
+# cp remoddle.sh ~/remoddle.sh
+# chmod +x ~/remoddle.sh
+# cp remoddle.exe ~/remoddle.exe
+# chmod +x ~/remoddle.exe
+# cp paddle.py ~/paddle.py
+# chmod +x ~/paddle.py
 # cp lcd.sh ~/lcd.sh
 # chmod +x ~/lcd.sh
 # cp lcd_print.sh ~/lcd_print.sh
 # chmod +x ~/lcd_print.sh
-cp remoddle.yaml ~/remoddle.yaml
-cp latest ~/latest
+# cp remoddle.yaml ~/remoddle.yaml
+# cp latest ~/latest
 # cp -r bundle/* ~/
 # chmod +x ~/rigller
 # ln -s ~/rigller ~/rigller.exe

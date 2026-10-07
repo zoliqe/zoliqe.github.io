@@ -1,0 +1,11 @@
+{
+  "toneFreq": 650,
+  "toneAmpl": 25,
+  "connections": {
+    "rozkvet-kx3": {
+      "url": "ws://om4q.radioklub.sk:8088/control",
+      "login": "unlis-nnnn",
+      "audioScript": "snapclient --player pipewire tcp://om4q.radioklub.sk"
+    }
+  }
+}

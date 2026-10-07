@@ -2,8 +2,10 @@ cd
 
 sudo apt update
 #sudo apt install -y evtest libasound2-dev libgpiod-dev lighttpd
-sudo apt install -y evtest python3-libgpiod
+sudo apt install -y evtest python3-libgpiod python3-serial python3-websockets
 pip install --break-system-packages pasimple
+#pip install --break-system-packages websockets
+#pip install --break-system-packages pyserial
 
 wget https://github.com/snapcast/snapcast/releases/download/v0.35.0/snapclient_0.35.0-1_arm64_trixie_with-pipewire.deb
 sudo dpkg -i snapclient_0.35.0-1_arm64_trixie_with-pipewire.deb

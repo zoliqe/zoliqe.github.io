@@ -1,0 +1,5 @@
+#!/bin/sh
+
+#runuser -u om4aa -- /home/om4aa/start.sh &
+/home/om4aa/remoddle-pi.sh &
+exit 0

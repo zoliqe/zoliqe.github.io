@@ -16,6 +16,11 @@ fi
 # echo "enabling i2c..."
 # sudo raspi-config nonint do_i2c 0
 
+# enable text console autologin - run only for Raspberry Pi Lite
+#sudo raspi-config nonint do_boot_behaviour B2
+# enable gui autologin - run only for Raspberry Pi with GUI (default enabled)
+#sudo raspi-config nonint do_boot_behaviour B4
+
 sudo usermod -aG dialout $USER
 sudo usermod -aG gpio $USER
 
