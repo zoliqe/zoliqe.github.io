@@ -33,6 +33,7 @@ pa = pasimple.PaSimple(
 ditLength = 40
 dahLength = 120
 toneFreq = 700
+toneAmpl = 100  # TODO use in generate_tone()
 ditTone = None
 dahTone = None
 
@@ -65,18 +66,18 @@ def play_tone(audio_data):
 
 
 def parse_line(line):
-    """Konfiguracia v tvare: dit dah space freq [reversed]"""
-    global ditLength, dahLength, toneFreq
+    """Konfiguracia v tvare: dit dah space freq ampl [reversed]"""
+    global ditLength, dahLength, toneFreq, toneAmpl
 
     parts = line.strip().split()
-    if len(parts) < 4:
+    if len(parts) < 5:
         return False
     try:
-        dit, dah, freq = int(parts[0]), int(parts[1]), int(parts[3])
+        dit, dah, freq, ampl = int(parts[0]), int(parts[1]), int(parts[3]), int(parts[4])
     except ValueError:
         return False
-    if (dit, dah, freq) != (ditLength, dahLength, toneFreq):
-        ditLength, dahLength, toneFreq = dit, dah, freq
+    if (dit, dah, freq, ampl) != (ditLength, dahLength, toneFreq, toneAmpl):
+        ditLength, dahLength, toneFreq, toneAmpl = dit, dah, freq, ampl
         generate_tones()
     return True
 

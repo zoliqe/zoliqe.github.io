@@ -64999,11 +64999,11 @@ a1q(a){var s=a.a
 this.dx.push(new A.bP(s,A.n(s).h("bP<1>")).f3(new A.a9k(this)))
 a.eB()},
 l(){this.an()
+var s=$.ace().gbj()
+if(s!=null)s.z3()
 this.aI()},
 an(){var s,r,q,p=this
 p.fx.K(0)
-s=$.ace().gbj()
-if(s!=null)s.z3()
 s=p.fr
 if(s!=null)s.aB()
 p.fr=null

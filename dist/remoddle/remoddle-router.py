@@ -30,6 +30,7 @@ sampleRate = 16000
 ditLength = 40
 dahLength = 120
 toneFreq = 700
+toneAmpl = 100  # TODO implement
 
 # 4. Konfigurácia sériového portu pre RP2040
 SERIAL_PORT = '/dev/cu.usbmodem101' #  '/dev/ttyACM0'
@@ -40,7 +41,6 @@ wsPort = 8072
 
 ditDelay = 0
 dahDelay = 0
-reversed = False
 ditTone = None
 dahTone = None
 
@@ -166,44 +166,19 @@ def send(char):
     ws_broadcast(char)
 
 def parse_line(line):
-    global ditLength, dahLength, spaceLength, toneFreq
+    global ditLength, dahLength, spaceLength, toneFreq, toneAmpl
 
     parts = line.strip().split()
-    if len(parts) >= 4:
+    if len(parts) > 4:
         try:
             ditLength = int(parts[0])
             dahLength = int(parts[1])
             spaceLength = int(parts[2])
             toneFreq = int(parts[3])
-            reversed = parts[4] == "1"
+            toneAmpl = int(parts[4])
             generate_tones()
         except ValueError:
             pass
-
-# def read_fifo():
-#     global ditLength, dahLength, toneFreq, fifo_buffer
-
-#     # Read from stdin if data is available
-#     try:
-#         data = os.read(sys.stdin.fileno(), 1024)
-#         if data:
-#             fifo_buffer += data.decode('utf-8')
-#             while '\n' in fifo_buffer:
-#                 line, fifo_buffer = fifo_buffer.split('\n', 1)
-#                 parts = line.strip().split()
-#                 if len(parts) >= 4:
-#                     try:
-#                         ditLength = int(parts[0])
-#                         dahLength = int(parts[1])
-#                         # spaceLength = int(parts[2])
-#                         toneFreq = int(parts[3])
-#                         generate_tones()
-#                     except ValueError:
-#                         pass
-#     except BlockingIOError:
-#         pass
-#     except OSError:
-#         pass
 
 def play_tone(audio_data):
     global pa

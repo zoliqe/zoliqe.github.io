@@ -41,17 +41,16 @@ threshold = 2
 ditLength = 40
 dahLength = 120
 spaceLength = 40
+reversed = False
 
 ditDelay = 0
 dahDelay = 0
 spaceDelay = 0
 
-toneFreq = 700
 # posledny prijaty konfiguracny riadok, posiela sa novym klientom (napr. remoddle-pi-tone.py)
 lastConfig = None
 
 running = True
-fifo_buffer = ""
 cyclesPerSec = 1000
 
 wsHost = "0.0.0.0"
@@ -139,48 +138,22 @@ def send(char):
     ws_broadcast(char)
 
 def parse_line(line):
-    global ditLength, dahLength, spaceLength, toneFreq, lastConfig
+    global ditLength, dahLength, spaceLength, reversed, lastConfig
 
     parts = line.strip().split()
-    if len(parts) >= 4:
+    if len(parts) > 5:
         try:
             ditLength = int(parts[0])
             dahLength = int(parts[1])
             spaceLength = int(parts[2])
-            toneFreq = int(parts[3])
-            reversed = len(parts) > 4 and parts[4] == "1"
+            reversed = int(parts[5]) > 0
+            # toneFreq, toneAmpl ignored
             compute_delays()
             lastConfig = line.strip()
             return True
         except ValueError:
             pass
     return False
-
-# def read_fifo():
-#     global fifo_buffer
-
-#     # data od websocket klientov
-#     while True:
-#         try:
-#             fifo_buffer += wsQueue.get_nowait()
-#         except queue.Empty:
-#             break
-
-#     # Read from stdin if data is available
-#     try:
-#         data = os.read(sys.stdin.fileno(), 1024)
-#         if data:
-#             fifo_buffer += data.decode('utf-8')
-#     except BlockingIOError:
-#         pass
-#     except OSError:
-#         pass
-
-#     while '\n' in fifo_buffer:
-#         line, fifo_buffer = fifo_buffer.split('\n', 1)
-#         parse_line(line)
-
-    
 
 # Time in milliseconds
 def now():
@@ -209,8 +182,8 @@ def watch_paddle():
     with gpiod.request_lines(chipPath, consumer="remoddle", config=gpioConfig) as request:
         while running:
             t0 = now()
-            dit_state = request.get_value(ditLine) == Value.INACTIVE
-            dah_state = request.get_value(dahLine) == Value.INACTIVE
+            dit_state = (request.get_value(dahLine) if reversed else request.get_value(ditLine)) == Value.INACTIVE
+            dah_state = (request.get_value(ditLine) if reversed else request.get_value(dahLine)) == Value.INACTIVE
             # print(f"dit_state: {dit_state}, dah_state: {dah_state}")
             if (dit_state and dit_val < threshold + 1): dit_val += 1
             elif (not dit_state and dit_val > 0): dit_val = 0
