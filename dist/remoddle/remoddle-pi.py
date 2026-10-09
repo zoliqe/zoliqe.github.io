@@ -30,10 +30,10 @@ dahLine = 19
 enc0id = '14'
 enc0swPin = 16
 gpioConfig={tuple([ditLine, dahLine]): gpiod.LineSettings(
-	edge_detection=Edge.BOTH,
-	direction=Direction.INPUT,
-	bias=Bias.PULL_UP,
-	debounce_period=timedelta(milliseconds=1),
+    edge_detection=Edge.BOTH,
+    direction=Direction.INPUT,
+    bias=Bias.PULL_UP,
+    debounce_period=timedelta(milliseconds=1),
 )}
 
 tailSpaces = 2
