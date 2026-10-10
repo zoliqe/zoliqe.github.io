@@ -146,7 +146,7 @@ def parse_line(line):
             ditLength = int(parts[0])
             dahLength = int(parts[1])
             spaceLength = int(parts[2])
-            reversed = int(parts[5]) > 0
+            reversed = parts[5] == "true"
             # toneFreq, toneAmpl ignored
             compute_delays()
             lastConfig = line.strip()
